@@ -3,8 +3,8 @@ source(file.path(getwd(),'functions','IITupdate.R')) #Functions for IIT update
 source(file.path(getwd(),'functions','balancing_functions.R')) #Balancing functions
 
 
-example1 <- function(num_sim, max_iter, p,p_1,theta,threshold,h,update_step){
-  simulation_name <- paste0('ex1_t',theta,'_p',p,'_p1',p_1,'.csv')
+example1 <- function(num_sim, max_iter, p,p_1,theta,threshold,h,update_step,name_alg){
+  simulation_name <- paste0('ex1_',name_alg,'_t',theta,'_p',p,'_p1',p_1,'.csv')
   ### Call and define functions to use for the simulation
   X_mode <- c(rep(1,p_1),rep(0,p-p_1)) #Global mode for example 1
   # pi <- function(X){ #Function to return the unnormalized target pi
@@ -66,5 +66,16 @@ example1(num_sim=50,
          p_1=50,
          theta=6,
          threshold=0.1,
+         h=hsq_log,
+         update_step=IITupdate_log,
+         name_alg='IIT')
+
+example1(num_sim=50,
+         max_iter=500*1000,
+         p=500,
+         p_1=50,
+         theta=6,
+         threshold=0.1,
          h=hmin_log,
-         update_step=IITupdate_log)
+         update_step=MHupdate_log,
+         name_alg='MH')
