@@ -10,7 +10,7 @@
 source(file.path(getwd(),'functions','IITupdate.R')) #Functions for IIT update
 source(file.path(getwd(),'functions','MHupdate.R')) #Functions for MH update
 
-MH-IITupdate <- function(X,pi,h,rho){
+MH_IITupdate <- function(X,pi,h,rho){
   if(runif(1)<=rho){
     return(IITupdate(X,pi,h))
   }else{
@@ -23,7 +23,7 @@ MH-IITupdate <- function(X,pi,h,rho){
 ### adjusting the balancing function accordingly
 ### In case probabilities are exp {something} and the balancing function 
 ### can be easily adapted
-MH-IITupdate_log <- function(X,logpi,logh,rho){
+MH_IITupdate_log <- function(X,logpi,logh,rho){
   if(runif(1)<=rho){
     return(IITupdate_log(X,logpi,logh))
   }else{
