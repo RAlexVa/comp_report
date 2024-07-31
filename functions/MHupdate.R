@@ -6,6 +6,7 @@
 # X: Vector of size p (Current state) 
 # Output: New state 
 MHupdate <- function(X,pi,h){
+  Xnew <- X
   c <- sample(1:p,size=1) #Choose a coordinate at random
   Xnew[c] <- 1-X[c] #Swap coordinate c
   prob <- min(1,pi(Xnew)/pi(X)) #Compute probability of accepting
@@ -21,6 +22,7 @@ MHupdate <- function(X,pi,h){
 ### This one works using log probabilities 
 ### In case probabilities are exp {something}
 MHupdate_log <- function(X,logpi,logh){
+  Xnew <- X
   c <- sample(1:p,size=1) #Choose a coordinate at random
   Xnew[c] <- 1-X[c] #Swap coordinate c
   logprob <- min(0,logpi(Xnew)-logpi(X)) #Compute probability of accepting
