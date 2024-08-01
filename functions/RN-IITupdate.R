@@ -33,7 +33,7 @@ RN_IITupdate <- function(X,pi,h,m){
 ### adjusting the balancing function accordingly
 ### In case probabilities are exp {something} and the balancing function 
 ### can be easily adapted
-RN_IITupdate_log <- function(X,logpi,logh){
+RN_IITupdate_log <- function(X,logpi,logh,m){
   neighbors <- sample(1:p,m, replace = F) #Choose m neighbors
   logprobs <- numeric(m) #Vector to store weights
   logpi_current <- logpi(X)
