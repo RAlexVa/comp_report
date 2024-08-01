@@ -8,7 +8,7 @@
 # h: balancing function
 # m: Size of the Random Neighborhood
 # Output: New state choosen proportionally and previous state's weight
-RN-IITupdate <- function(X,pi,h,m){
+RN_IITupdate <- function(X,pi,h,m){
   neighbors <- sample(1:p,m, replace = F) #Choose m neighbors
   probs <- numeric(m) #Vector to store weights
   pi_current <- pi(X)
@@ -33,7 +33,7 @@ RN-IITupdate <- function(X,pi,h,m){
 ### adjusting the balancing function accordingly
 ### In case probabilities are exp {something} and the balancing function 
 ### can be easily adapted
-RN-IITupdate_log <- function(X,logpi,logh){
+RN_IITupdate_log <- function(X,logpi,logh){
   neighbors <- sample(1:p,m, replace = F) #Choose m neighbors
   logprobs <- numeric(m) #Vector to store weights
   logpi_current <- logpi(X)
