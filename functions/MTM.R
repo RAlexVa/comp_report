@@ -8,7 +8,7 @@
 # h: balancing function (The weight is h applied to the ratio of probabilities)
 # m: Number of proposals to consider
 # Output: New state choosen proportionally and previous state's weight
-MTMupdate <- function(X,pi,h,m){
+MTMupdate <- function(X,pi,h,p,m){
   neighbors <- sample(1:p,m, replace = F) #Choose m DISTINCT neighbors
   probs_going <- numeric(m) #Vector to store weights
   pi_current <- pi(X)
@@ -51,7 +51,7 @@ MTMupdate <- function(X,pi,h,m){
 ### adjusting the balancing function accordingly
 ### In case probabilities are exp {something} and the balancing function 
 ### can be easily adapted
-MTMupdate_log <- function(X,logpi,logh,m){
+MTMupdate_log <- function(X,logpi,logh,p,m){
   neighbors <- sample(1:p,m, replace = F) #Choose m neighbors
   logprobs_going <- numeric(m) #Vector to store weights
   logpi_current <- logpi(X)

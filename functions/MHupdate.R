@@ -5,7 +5,7 @@
 # pi: Function to return value of unnormalized target distribution
 # X: Vector of size p (Current state) 
 # Output: New state 
-MHupdate <- function(X,pi,h){
+MHupdate <- function(X,pi,h,p){
   Xnew <- X
   c <- sample(1:p,size=1) #Choose a coordinate at random
   Xnew[c] <- 1-X[c] #Swap coordinate c
@@ -21,7 +21,7 @@ MHupdate <- function(X,pi,h){
 ### Second function 
 ### This one works using log probabilities 
 ### In case probabilities are exp {something}
-MHupdate_log <- function(X,logpi,logh){
+MHupdate_log <- function(X,logpi,logh,p){
   Xnew <- X
   c <- sample(1:p,size=1) #Choose a coordinate at random
   Xnew[c] <- 1-X[c] #Swap coordinate c

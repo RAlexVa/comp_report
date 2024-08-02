@@ -6,7 +6,7 @@
 # X: Vector of size p (Current state) 
 # h: balancing function
 # Output: New state choosen proportionally and previous state's weight
-IITupdate <- function(X,pi,h){
+IITupdate <- function(X,pi,h,p){
   probs <- numeric(p) #Vector to store weights
   pi_current <- pi(X)
   for(c in 1:p){
@@ -30,7 +30,7 @@ IITupdate <- function(X,pi,h){
 ### adjusting the balancing function accordingly
 ### In case probabilities are exp {something} and the balancing function 
 ### can be easily adapted
-IITupdate_log <- function(X,logpi,logh){
+IITupdate_log <- function(X,logpi,logh,p){
   logprobs <- numeric(p) #Vector to store weights
   logpi_current <- logpi(X)
   for(c in 1:p){
