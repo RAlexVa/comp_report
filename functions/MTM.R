@@ -43,7 +43,7 @@ MTMupdate <- function(X,pi,h,p,m){
     Xnew <- X
   }
   weight <- 1 #Weight is always 1
-  return(list(Xnew,weight))
+  return(list(Xnew,weight,m+m-1))
 }
 
 ### Second function 
@@ -88,5 +88,5 @@ MTMupdate_log <- function(X,logpi,logh,p,m){
     Xnew <- X
   }
   weight <- 1 #Weight is always 1
-  return(list(Xnew,weight))
+  return(list(Xnew,weight,m+m-1))
 }

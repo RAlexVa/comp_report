@@ -22,7 +22,7 @@ IITupdate <- function(X,pi,h,p){
   Xnew <- X
   Xnew[index] <- 1-X[index] #Choose neighbor state
   weight <- 1/mean(probs) #Compute weight using mean since we're using uniform dist.
-  return(list(Xnew,weight))
+  return(list(Xnew,weight,p))
 }
 
 ### Second function 
@@ -46,5 +46,5 @@ IITupdate_log <- function(X,logpi,logh,p){
   Xnew <- X
   Xnew[index] <- 1-X[index] #Choose neighbor state
   weight <- 1/mean(exp(logprobs)) #Compute weight using mean since we're using uniform dist.
-  return(list(Xnew,weight))
+  return(list(Xnew,weight,p))
 }

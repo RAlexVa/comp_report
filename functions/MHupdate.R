@@ -4,7 +4,7 @@
 # Input:
 # pi: Function to return value of unnormalized target distribution
 # X: Vector of size p (Current state) 
-# Output: New state 
+# Output: New state, weight, number of times that pi was used - 1
 MHupdate <- function(X,pi,h,p){
   Xnew <- X
   c <- sample(1:p,size=1) #Choose a coordinate at random
@@ -15,7 +15,7 @@ MHupdate <- function(X,pi,h,p){
     Xnew <- X #We stay in the current state
   }
   weight <- 1#The weight is always 1 
-  return(list(Xnew,weight))
+  return(list(Xnew,weight,1))
 }
 
 ### Second function 
@@ -31,5 +31,5 @@ MHupdate_log <- function(X,logpi,logh,p){
     Xnew <- X #We stay in the current state
   }
   weight <- 1 #The weight is always 1 
-  return(list(Xnew,weight))
+  return(list(Xnew,weight,1))
 }
