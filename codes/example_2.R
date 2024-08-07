@@ -1,4 +1,5 @@
 #rm(list=ls())
+setwd('..')
 ### Source functions
 source(file.path(getwd(),'functions','IITupdate.R')) #Functions for IIT update
 source(file.path(getwd(),'functions','MHupdate.R')) #Functions for MH update
@@ -7,14 +8,14 @@ source(file.path(getwd(),'functions','RN-IITupdate.R')) #Functions for RN-IIT up
 source(file.path(getwd(),'functions','MTM.R')) #Functions for RN-IIT update
 source(file.path(getwd(),'functions','balancing_functions.R')) #Balancing functions
 example2 <- function(num_sim=50,
-                     max_iter=500*1000,
+                     max_iter=300*1000,
                      p=500,
                      theta,
                      threshold=0.2,
                      h,
                      update_step,
                      name_alg){
-  simulation_name <- paste0('ex2_',name_alg,'_t',theta,'_p',p,'.csv')
+  simulation_name <- paste0('ex2_',name_alg,'_t',theta,'_p',p,'_sim',num_sim,'.csv')
   ### Call and define functions to use for the simulation
   X_mode <- c(1,rep(0,p-1)) #Global mode for example 2
   pi.distribution <- function(X){ #Function to return the log probabilities
@@ -45,7 +46,7 @@ example2 <- function(num_sim=50,
   calls_for_pi <- c()
   last_F_value <- c()
   for(i in 1:num_sim){
-    print(paste('Simulation:',i))
+    print(paste(name_alg,'Simulation:',i,'theta',theta))
     ### To check thresholds
     pi_F_est <- numeric(p+1)
     early_finish <- FALSE #To check if convergence was achieved before max. iterations
@@ -55,9 +56,9 @@ example2 <- function(num_sim=50,
     count_PIs <- 0
     ### Within that for loop need a loop for the steps (considering max number of iterations)
     for(step in 1:max_iter){
-      if(step %% 1000 ==0){print(paste('Iteration: ',step,', Simulation:',i))}
+      if(step %% 1000 ==0){print(paste(name_alg,'theta',theta,',Iteration:',step,',Simulation:',i))}
       iter <- update_step(X,pi.distribution,h,p)
-      W <- max(iter[[2]],.Machine$double.eps) #Estimated weight of previous state
+      W <- max(iter[[2]],.Machine$double.eps) #Estimated weight of previous state, bounding it from below
       count_PIs <- count_PIs+iter[[3]]
       #Adding a minimum that is above 0 to avoid issues with very low numbers
       Feval <- Fm(X) +1 #Function F evaluated
@@ -81,18 +82,47 @@ example2 <- function(num_sim=50,
   write.csv(cbind(iter_conv,calls_for_pi,last_F_value),file=file.path(getwd(),'results',simulation_name) ,row.names = F)
 }
 
-set.seed(348) #Define seed
-example2(theta=6,
-         h=hsq_log,
-         update_step=IITupdate_log,
-         name_alg='IIT')
+MTM_defined <- function(X,pi,h,p){
+  return(MTMupdate_log(X,pi,h,p,m=100))
+}
 
-# num_sim=50;
-# max_iter=500*1000;
-# p=500;
-# p_1=50;
-# theta=6;
-# threshold=0.1;
-# h=hmin_log;
-# update_step=IITupdate_log;
-# name_alg='IIT'
+# Parameters
+thetas <- c(6,7,8,9) 
+set.seed(348) #Define seed
+for(i in 1:length(thetas)){
+    theta_selected <- thetas[i]
+    
+    example2(theta=theta_selected,
+             h=hsq_log,
+             update_step=IITupdate_log,
+             name_alg='IIT')
+    
+    example2(theta=theta_selected,
+             h=hmin_log,
+             update_step=MHupdate_log,
+             name_alg='MH')
+    
+    MH_IIT_defined <- function(X,pi,h,p){
+      return(MH_IITupdate_log(X,pi,h,p,rho=0.025))
+    }
+    example2(theta=theta_selected,
+             h=hmin_log,
+             update_step=MH_IIT_defined,
+             name_alg='MH-IIT')
+    
+    RN_IIT_defined <- function(X,pi,h,p){
+      return(RN_IITupdate_log(X,pi,h,p,m=100))
+    }
+    example2(theta=theta_selected,
+             h=hmin_log,
+             update_step=RN_IIT_defined,
+             name_alg='RN-IIT')
+    
+    MTM_defined <- function(X,pi,h,p){
+      return(MTMupdate_log(X,pi,h,p,m=100))
+    }
+    example2(theta=theta_selected,
+             h=hsq_log,
+             update_step=MTM_defined,
+             name_alg='MTM')
+  }
