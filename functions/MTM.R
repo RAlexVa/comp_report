@@ -60,8 +60,23 @@ MTMupdate_log <- function(X,logpi,logh,p,m){
     Xnew[neighbors[c]] <- 1-X[neighbors[c]] #Swap coordinate c
     logprobs_going[c] <- logh(logpi(Xnew)-logpi_current)
   }
-  probs_going <- exp(logprobs_going) #Normalize the probabilities
+  # print('new iteration')
+  # print(logpi_current)
+  # print(sum(X))
+  # print(X)
+  # print(neighbors)
+  # print(X[neighbors])
+  # print(logprobs_going)
+  probs_going <- exp(logprobs_going) #Apply exp to the probabilities
+  probs_going[probs_going==0] <- .Machine$double.eps; #Fix extremely low probabilities
+  coord <- which(probs_going==Inf)
+  if(!identical(integer(0),coord)){#Fix extremely high probabilities
+    probs_going[coord] <- 1;
+    probs_going[-coord] <- .Machine$double.eps;
+  }
+  #print(probs_going)
   probs_going <- probs_going/sum(probs_going) #Normalize the probabilities
+  #print(probs_going)
   Y <- X
   choose_neigh <- sample(1:m,size=1,prob=probs_going) #Choose which neighbor
   Y[neighbors[choose_neigh]] <- 1-Y[neighbors[choose_neigh]] #Swap coordinate to choose a neighbor Y
@@ -78,9 +93,21 @@ MTMupdate_log <- function(X,logpi,logh,p,m){
     logprobs_returning[c] <- logh(logpi(Ynew)-logpiY_current)
   }
   probs_returning <- exp(logprobs_returning)
+  probs_returning[probs_returning==0] <- .Machine$double.eps; #Fix extremely low probabilities
+  coord <- which(probs_returning==Inf)
+  if(!identical(integer(0),coord)){#Fix extremely high probabilities
+    probs_returning[coord] <- 1;
+    probs_returning[-coord] <- .Machine$double.eps;
+  }
   probs_returning <- probs_returning/sum(probs_returning)
-  
-  Ap <- exp(logpiY_current-logpi_current)*(probs_returning[choose_neigh]/probs_going[choose_neigh])#computing accetance probability
+  # print('new iteration')
+  # print(probs_returning)
+  # print(logpiY_current)
+  # print(logpi_current)
+  # print(choose_neigh)
+  # print(probs_returning[choose_neigh])
+  # print(probs_going[choose_neigh])
+  Ap <- exp(logpiY_current-logpi_current)*(probs_returning[choose_neigh]/probs_going[choose_neigh])#computing acceptance probability
   Ap <- min(1,Ap)
   if(runif(1)<Ap){
     Xnew <- Y
