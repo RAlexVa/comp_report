@@ -1,7 +1,7 @@
 ### Balancing functions
 
 hmin <- function(r){return(min(1,r))}
-hsq <- function(r){return(sq(r))}
+hsq <- function(r){return(sqrt(r))}
 hmax <- function(r){return(max(1,r))}
 hc <- function(r,c=1){
   first <- min(1,r*exp(-c))
