@@ -82,13 +82,9 @@ example2 <- function(num_sim=50,
   write.csv(cbind(iter_conv,calls_for_pi,last_F_value),file=file.path(getwd(),'results',simulation_name) ,row.names = F)
 }
 
-MTM_defined <- function(X,pi,h,p){
-  return(MTMupdate_log(X,pi,h,p,m=100))
-}
-
 # Parameters
 thetas <- c(6,7,8,9) 
-set.seed(348) #Define seed
+set.seed(235) #Define seed
 for(i in 1:length(thetas)){
     theta_selected <- thetas[i]
     
@@ -108,7 +104,16 @@ for(i in 1:length(thetas)){
     example2(theta=theta_selected,
              h=hmin_log,
              update_step=MH_IIT_defined,
-             name_alg='MH-IIT')
+             name_alg='MH-IIT-1')
+    
+    MH_IIT_defined <- function(X,pi,h,p){
+      return(MH_IITupdate_log(X,pi,h,p,rho=0.025))
+    }
+    h_defined <- function(r){return(hc_log(r,c=2*theta_selected))}
+    example2(theta=theta_selected,
+             h=h_defined,
+             update_step=MH_IIT_defined,
+             name_alg='MH-IIT-2')
     
     RN_IIT_defined <- function(X,pi,h,p){
       return(RN_IITupdate_log(X,pi,h,p,m=100))
