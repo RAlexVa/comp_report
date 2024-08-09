@@ -94,33 +94,29 @@ for(i in 1:length(thetas)){
 ############################    
     example1(theta=theta_selected,p_1=p1_selected,
              h=hsq_log,
-             name_alg='IIT-RF',
+             name_alg='IIT-RF-1',
              initial_K=.01) #timy constany
 ############################    
     example1(theta=theta_selected,p_1=p1_selected,
              h=hsq_log,
-             name_alg='IIT-RF',
+             name_alg='IIT-RF-2',
              initial_K=1) #minimum constant  
 ############################    
     example1(theta=theta_selected,p_1=p1_selected,
              h=hsq_log,
-             name_alg='IIT-RF',
+             name_alg='IIT-RF-3',
              initial_K=exp(theta_selected/2))#Optimal bounding K
     
 ############################
     example1(theta=theta_selected,p_1=p1_selected,
              h=hsq_log,
-             name_alg='IIT-RF',
+             name_alg='IIT-RF-4',
              initial_K=10*exp(theta_selected))#big bounding K
     
     ############################
     example1(theta=theta_selected,p_1=p1_selected,
              h=hsq_log,
-             name_alg='IIT-RF',
+             name_alg='IIT-RF-5',
              initial_K=300*exp(theta_selected))#huge bounding K
   }
 }
-
-
-
-
