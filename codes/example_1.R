@@ -112,11 +112,7 @@ ex1_RN_IIT <- function(num_sim=50,
   iter_conv <- c()
   calls_for_pi <- c()
   last_F_value <- c()
-  ### For testing
-  mode_est <- 0
-  weights_historic <- c()
-  hamm_dist_hist <- c()
-  
+
   for(i in 1:num_sim){
     print(paste(name_alg,'Simulation:',i,'theta',theta))
     ### To check thresholds
@@ -137,7 +133,6 @@ ex1_RN_IIT <- function(num_sim=50,
       hamm_dist <- sum(abs(X_mode-X)) #distance to mode
       pi_F_est[hamm_dist + 1] <- pi_F_est[hamm_dist + 1] + W #Assign estimated weight
       
-      if(all(X==X_mode)){mode_est <- mode_est+W}
       if(dist_pi(pi_F_est/sum(pi_F_est)) < threshold){ #Compare true dist with normalized est dist.
         #If the chain converged
         iter_conv <- c(iter_conv,step) #Register number of steps needed
