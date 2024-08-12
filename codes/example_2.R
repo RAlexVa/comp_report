@@ -51,7 +51,7 @@ example2 <- function(num_sim=50,
     pi_F_est <- numeric(p+1)
     early_finish <- FALSE #To check if convergence was achieved before max. iterations
     #Initialize
-    X <- rep(0,p)
+    X <- c(rep(0,10),rep(1,p-10))
     #Counting the number of times we used the PI function
     count_PIs <- 0
     ### Within that for loop need a loop for the steps (considering max number of iterations)
