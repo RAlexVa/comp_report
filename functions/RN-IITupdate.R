@@ -8,8 +8,8 @@
 # h: balancing function
 # m: Size of the Random Neighborhood
 # Output: New state choosen proportionally and previous state's weight
-RN_IITupdate <- function(X,pi,h,p,m){
-  neighbors <- sample(1:p,m, replace = F) #Choose m neighbors
+RN_IITupdate <- function(X,pi,h,p,m,neighbors){
+  #neighbors <- sample(1:p,m, replace = F) #Choose m neighbors
   probs <- numeric(m) #Vector to store weights
   pi_current <- pi(X)
   for(c in 1:m){
@@ -23,9 +23,13 @@ RN_IITupdate <- function(X,pi,h,p,m){
   index = which.min(D) #Select index to choose neighbor
   
   Xnew <- X
-  Xnew[neighbors[index]] <- 1-X[neighbors[index]] #Choose neighbor state
+  selected_neighbor <- neighbors[index]
+  Xnew[selected_neighbor] <- 1-X[selected_neighbor] #Choose neighbor state
   weight <- 1/mean(probs) #Compute weight using mean since we're using uniform dist.
-  return(list(Xnew,weight,m))
+  #Select new neighborhood
+  #Send the assignment to the global environment
+  neighbors <- c(sample((1:p)[-selected_neighbor],m-1,replace = F),selected_neighbor)
+  return(list(Xnew,weight,m,neighbors))
 }
 
 ### Second function 
@@ -33,8 +37,8 @@ RN_IITupdate <- function(X,pi,h,p,m){
 ### adjusting the balancing function accordingly
 ### In case probabilities are exp {something} and the balancing function 
 ### can be easily adapted
-RN_IITupdate_log <- function(X,logpi,logh,p,m){
-  neighbors <- sample(1:p,m, replace = F) #Choose m neighbors
+RN_IITupdate_log <- function(X,logpi,logh,p,m,neighbors){
+  #neighbors <- sample(1:p,m, replace = F) #Choose m neighbors
   logprobs <- numeric(m) #Vector to store weights
   logpi_current <- logpi(X)
   for(c in 1:m){
@@ -48,7 +52,11 @@ RN_IITupdate_log <- function(X,logpi,logh,p,m){
   index = which.min(D) #Select index to choose neighbor
   
   Xnew <- X
-  Xnew[neighbors[index]] <- 1-X[neighbors[index]] #Choose neighbor state
+  selected_neighbor <- neighbors[index]
+  Xnew[selected_neighbor] <- 1-X[selected_neighbor] #Choose neighbor state
   weight <- 1/mean(exp(logprobs)) #Compute weight using mean since we're using uniform dist.
-  return(list(Xnew,weight,m))
+  #Select new neighborhood
+  #Send the assignment to the global environment
+  neighbors <- c(sample((1:p)[-selected_neighbor],m-1,replace = F),selected_neighbor)
+  return(list(Xnew,weight,m,neighbors))
 }
