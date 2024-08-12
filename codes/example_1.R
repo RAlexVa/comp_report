@@ -155,7 +155,7 @@ ex1_RN_IIT <- function(num_sim=50,
 # Parameters
 thetas <- c(6,7,8,9) 
 p1s <- c(20,50)
-set.seed(348) #Define seed
+set.seed(1348) #Define seed
 for(i in 1:length(thetas)){
   for(j in 1:length(p1s)){
     theta_selected <- thetas[i]
