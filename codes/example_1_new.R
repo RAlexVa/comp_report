@@ -17,10 +17,6 @@ example1 <- function(num_sim=50,
   simulation_name <- paste0('ex1_',name_alg,'_t',theta,'_p',p,'_p1_',p_1,'_sim',num_sim,'K',round(initial_K,2),'.csv')
   ### Call and define functions to use for the simulation
   X_mode <- c(rep(1,p_1),rep(0,p-p_1)) #Global mode for example 1
-  # pi <- function(X){ #Function to return the unnormalized target pi
-  #   dif <- -sum(abs(X-X_mode))
-  #   return(exp(theta*dif))
-  # }
   pi.distribution <- function(X){ #Function to return the log probabilities
     dif <- -sum(abs(X-X_mode))
     return(theta*dif)
