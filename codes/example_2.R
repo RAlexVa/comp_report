@@ -161,20 +161,20 @@ ex2_RN_IIT <- function(num_sim=50,
 }
 
 
-MH_IIT_defined <- function(X,pi,h,p){
-  return(MH_IITupdate_log(X,pi,h,p,rho=0.025))
-}
-theta_selected <- 6
-h_defined <- function(r){return(hc_log(r,c=2*theta_selected))}
-
-num_sim=1;
-max_iter=10*1000;
-p=500;
-theta=6;
-threshold=0.2;
-h=h_defined;
-update_step=MH_IIT_defined;
-name_alg='MH_IIT'
+# MH_IIT_defined <- function(X,pi,h,p){
+#   return(MH_IITupdate_log(X,pi,h,p,rho=0.025))
+# }
+# theta_selected <- 6
+# h_defined <- function(r){return(hc_log(r,c=2*theta_selected))}
+# 
+# num_sim=1;
+# max_iter=10*1000;
+# p=500;
+# theta=6;
+# threshold=0.2;
+# h=h_defined;
+# update_step=MH_IIT_defined;
+# name_alg='MH_IIT'
 
 
 
