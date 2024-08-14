@@ -1,5 +1,6 @@
-#rm(list=ls())
 setwd('..')
+#rm(list=ls())
+
 ### Source functions
 source(file.path(getwd(),'functions','IITupdate.R')) #Functions for IIT update
 source(file.path(getwd(),'functions','MHupdate.R')) #Functions for MH update
@@ -182,7 +183,7 @@ ex3_RN_IIT <- function(num_sim=50,
     ### Within that for loop need a loop for the steps (considering max number of iterations)
     for(step in 1:max_iter){
       if(step %% 1000 ==0){print(paste(name_alg,'theta',theta,',Iteration:',step,',Simulation:',i))}
-      iter <- update_step(X,pi.distribution,h,p)
+      iter <- update_step(X,pi.distribution,h,p,m,neighbors)
       W <- max(iter[[2]],.Machine$double.eps) #Estimated weight of previous state, bounding it from below
       count_PIs <- count_PIs+iter[[3]]
       #Adding a minimum that is above 0 to avoid issues with very low numbers
