@@ -14,7 +14,7 @@ example1 <- function(num_sim=50,
                      update_step=IIT_RFupdate_log,
                      name_alg,
                      initial_K){
-  simulation_name <- paste0('ex1_',name_alg,'_t',theta,'_p',p,'_p1_',p_1,'_sim',num_sim,'K',round(initial_K,2),'.csv')
+  simulation_name <- paste0('ex1_',name_alg,'_t',theta,'_p',p,'_p1_',p_1,'_sim',num_sim,'_K',round(initial_K,2),'.csv')
   ### Call and define functions to use for the simulation
   X_mode <- c(rep(1,p_1),rep(0,p-p_1)) #Global mode for example 1
   pi.distribution <- function(X){ #Function to return the log probabilities
@@ -36,28 +36,28 @@ example1 <- function(num_sim=50,
   iter_conv <- c()
   calls_for_pi <- c()
   last_F_value <- c()
-  iteration_K <- c()
-  final_K <- c()
+  iteration_K <- c() #Specific for RF-IIT
+  final_K <- c()#Specific for RF-IIT
   for(i in 1:num_sim){
     print(paste(name_alg,'Simulation:',i,'theta',theta))
     ### To check thresholds
     pi_F_est <- numeric(p+1)
     early_finish <- FALSE #To check if convergence was achieved before max. iterations
-    bounding_K <- initial_K 
+    bounding_K <- initial_K #Specific for RF-IIT
     #Initialize
     X <- rep(0,p)
     #Counting the number of times we used the PI function
     count_PIs <- 0
     #Counting the number of times we updated K
-    count_K <- 0
+    count_K <- 0 #Specific for RF-IIT
     ### Within that for loop need a loop for the steps (considering max number of iterations)
     for(step in 1:max_iter){
       if(step %% 1000 ==0){print(paste(name_alg,'theta',theta,',Iteration:',step,',Simulation:',i))}
       iter <- update_step(X,pi.distribution,h,p,bounding_K)
       W <- max(iter[[2]],.Machine$double.eps) #Estimated weight of previous state, bounding it from below
       count_PIs <- count_PIs+iter[[3]]
-      bounding_K <- iter[[4]]
-      count_K <- count_K+iter[[5]]
+      bounding_K <- iter[[4]]#Specific for RF-IIT
+      count_K <- count_K+iter[[5]]#Specific for RF-IIT
       hamm_dist <- sum(abs(X_mode-X)) #distance to mode
       pi_F_est[hamm_dist + 1] <- pi_F_est[hamm_dist + 1] + W #Assign estimated weight
       if(dist_pi(pi_F_est/sum(pi_F_est)) < threshold){ #Compare true dist with normalized est dist.
@@ -71,8 +71,8 @@ example1 <- function(num_sim=50,
     }
     calls_for_pi <- c(calls_for_pi,count_PIs) #Register number of times we used the PI function
     last_F_value <- c(last_F_value,dist_pi(pi_F_est/sum(pi_F_est))) #Register last distance from true pi(F)
-    iteration_K <- c(iteration_K,count_K)
-    final_K <- c(final_K,bounding_K)
+    iteration_K <- c(iteration_K,count_K)#Specific for RF-IIT
+    final_K <- c(final_K,bounding_K)#Specific for RF-IIT
     #If after max_iter iterations it didn't converge
     if(!early_finish){iter_conv <- c(iter_conv,max_iter)} #register max_iter  
   }
@@ -91,7 +91,7 @@ for(i in 1:length(thetas)){
     example1(theta=theta_selected,p_1=p1_selected,
              h=hsq_log,
              name_alg='IIT-RF-1',
-             initial_K=.01) #timy constany
+             initial_K=.01) #tiny constany
 ############################    
     example1(theta=theta_selected,p_1=p1_selected,
              h=hsq_log,
