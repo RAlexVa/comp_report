@@ -16,13 +16,16 @@ IIT_RFupdate <- function(X,pi,h,p, bounding_K){
     probs[c] <- h(pi(Xnew)/pi_current)
   }
   newK <- max(K,max(probs),1/min(probs)) #Update the bounding constant K
+  newK <- min(newK,1.797693e+308) #Bound the max so we dont get Inf
   U = runif(p)
   D = -log(U)/probs #Selecting a state proportional to the Prob. vector
   index = which.min(D) #Select index to choose neighbor
   
   Xnew <- X
   Xnew[index] <- 1-X[index] #Choose neighbor state
-  weight <- 1 + rgeom(1,mean(probs)/newK) #Compute weight using a geometric distribution
+  param <- max(mean(probs)/newK,.Machine$double.xmin)
+  weight <- 1 + rgeom(1,param) #Compute weight using a geometric distribution
+  while(is.na(weight)){weight <- 1 + rgeom(1,param)} #In case of NA, run again
   return(list(Xnew,weight,p,newK,(K!=newK)*1))
 }
 
@@ -41,12 +44,15 @@ IIT_RFupdate_log <- function(X,logpi,logh,p,bounding_K){
     logprobs[c] <- logh(logpi(Xnew)-logpi_current)
   }
   newK <- max(K,exp(max(logprobs)),exp(-min(logprobs))) #Update the bounding constant K
+  newK <- min(newK,.Machine$double.xmax) #Bound the max so we dont get Inf
   U = runif(p)
   D = log(-log(U))-logprobs #Selecting a state proportional to the log Prob. vector
   index = which.min(D) #Select index to choose neighbor
   
   Xnew <- X
   Xnew[index] <- 1-X[index] #Choose neighbor state
-  weight <- 1 + rgeom(1,mean(exp(logprobs))/newK) #Compute weight using a geometric distribution
+  param <- max(mean(exp(logprobs))/newK,.Machine$double.xmin)
+  weight <- 1 + rgeom(1,param) #Compute weight using a geometric distribution
+  while(is.na(weight)){weight <- 1 + rgeom(1,param)} #In case of NA, run again
   return(list(Xnew,weight,p,newK,(K!=newK)*1))
 }
