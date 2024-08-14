@@ -7,8 +7,6 @@ source(file.path(getwd(),'functions','MH-IITupdate.R')) #Functions for MH update
 source(file.path(getwd(),'functions','RN-IITupdate.R')) #Functions for RN-IIT update
 source(file.path(getwd(),'functions','MTM.R')) #Functions for RN-IIT update
 source(file.path(getwd(),'functions','balancing_functions.R')) #Balancing functions
-
-
 example1 <- function(num_sim=50,
                      max_iter=500*1000,
                      p=500,
@@ -77,8 +75,6 @@ example1 <- function(num_sim=50,
   }
   write.csv(cbind(iter_conv,calls_for_pi,last_F_value),file=file.path(getwd(),'results',simulation_name) ,row.names = F)
 }
-
-
 ex1_RN_IIT <- function(num_sim=50,
                      max_iter=500*1000,
                      p=500,
