@@ -1,8 +1,11 @@
 #rm(list=ls())
 library(tidyverse)
 library(latex2exp)
-files <- dir(file.path(getwd(),'results_moba'))
-
+file_route <- file.path('results_moba','2_run_12AGO')
+files <- dir(file.path(getwd(),file_route))
+# files <- dir(file.path(getwd(),'results_moba'))
+# files <- dir(file.path(getwd(),'results_moba','2_run_12AGO'))
+# files <- dir(file.path(getwd(),'results_moba','1_run_9AGO'))
 # Remove files of only 1 simulation
 # sim1 <- files[grep('sim1.csv',files)]
 # 
@@ -20,7 +23,7 @@ data_ex1 <- tibble()
 data_ex2 <- tibble()
 
 for(i in 1:length(files)){
-  temp_file <- read_csv(file.path(getwd(),'results_moba',files[i]), col_types = cols())
+  temp_file <- read_csv(file.path(getwd(),file_route,files[i]), col_types = cols())
   parameters <- unlist(strsplit(gsub('[sim,t,p]','',gsub('.csv','',files[i])),split="[_,K]"))
   if(parameters[2]=='IIT-RF' & parameters[1]=='ex1'){
     par_matrix <- matrix(parameters[c(1,2,3,6,8)],nrow=50,ncol=5,byrow=T)
@@ -50,7 +53,7 @@ ex1_rf_iit$alg <- paste0(ex1_rf_iit$alg,'-',ex1_rf_iit$K)
 data_ex1 <- rbind(data_ex1,ex1_rf_iit |> select(colnames(data_ex1)))
 
 data_ex1 |> 
-  filter(p_1==50) |> 
+  filter(p_1==50) |> filter(alg!='RN-IIT') |> 
   mutate(post_calls=ifelse(calls_for_pi>500000,500000,calls_for_pi)) |> 
   ggplot(aes(x=theta,y=post_calls)) +
   geom_boxplot(aes(fill=alg))+
@@ -69,5 +72,6 @@ data_ex2 |>
   mutate(post_calls=ifelse(calls_for_pi>500000,500000,calls_for_pi)) |> 
   filter(alg!='RN-IIT') |> 
   ggplot(aes(x=theta,y=post_calls)) +
-  geom_boxplot(aes(fill=alg))
+  geom_boxplot(aes(fill=alg))+
+  labs(x=TeX("$\\theta$"), y=TeX('Calls for $\\pi$'),title='Example 2')
 
