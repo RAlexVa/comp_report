@@ -18,7 +18,7 @@ example3 <- function(num_sim=50,
                      h,
                      update_step,
                      name_alg){
-  simulation_name <- paste0('ex3_',name_alg,'_t',theta,'_p',p,'_p1',p_1,'_sim',num_sim,'.csv')
+  simulation_name <- paste0('ex3_',name_alg,'_t',theta,'_p',p,'_p1_',p_1,'_sim',num_sim,'.csv')
   ### Call and define functions to use for the simulation
   X_mode1 <- c(1,0,rep(1,p_1-1),rep(0,p-p_1-1)) #Global mode for example 2
   X_mode2 <- c(0,rep(1,p_1),rep(0,p-p_1-1))
@@ -117,7 +117,7 @@ ex3_RN_IIT <- function(num_sim=50,
                      update_step=RN_IITupdate_log,
                      m=40,
                      name_alg){
-  simulation_name <- paste0('ex3_',name_alg,'_t',theta,'_p',p,'_p1',p_1,'_sim',num_sim,'.csv')
+  simulation_name <- paste0('ex3_',name_alg,'_t',theta,'_p',p,'_p1_',p_1,'_sim',num_sim,'.csv')
   ### Call and define functions to use for the simulation
   X_mode1 <- c(1,0,rep(1,p_1-1),rep(0,p-p_1-1)) #Global mode for example 2
   X_mode2 <- c(0,rep(1,p_1),rep(0,p-p_1-1))
@@ -219,7 +219,7 @@ ex3_RF_IIT <- function(num_sim=50,
                      update_step=IIT_RFupdate_log,
                      name_alg,
                      initial_K){
-  simulation_name <- paste0('ex3_',name_alg,'_t',theta,'_p',p,'_p1',p_1,'_sim',num_sim,'_K',round(initial_K,2),'.csv')
+  simulation_name <- paste0('ex3_',name_alg,'_t',theta,'_p',p,'_p1_',p_1,'_sim',num_sim,'_K',round(initial_K,2),'.csv')
   ### Call and define functions to use for the simulation
   X_mode1 <- c(1,0,rep(1,p_1-1),rep(0,p-p_1-1)) #Global mode for example 2
   X_mode2 <- c(0,rep(1,p_1),rep(0,p-p_1-1))
