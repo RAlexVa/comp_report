@@ -4,7 +4,19 @@ setwd('..')
 
 source(file.path(getwd(),'functions','balancing_functions.R')) #Balancing functions
 source(file.path(getwd(),'functions','IIT-RFupdate.R')) #Functions for IIT-RF update
-
+fix_dist <- function(pi_F_est){
+  #First fix
+  totalizer <- sum(pi_F_est)
+  if(totalizer==Inf){totalizer <- .Machine$double.xmax}
+  newpi <- pi_F_est/totalizer
+  #recurrent fix
+  while(sum(newpi)==Inf){
+    totalizer <- sum(newpi)
+    if(totalizer==Inf){totalizer <- .Machine$double.xmax}
+    newpi <- newpi/totalizer
+  }
+  return(newpi)
+}
 ex2_RF_IIT <- function(num_sim=50,
                        max_iter=500*1000,
                        p=500,
@@ -69,22 +81,10 @@ ex2_RF_IIT <- function(num_sim=50,
       #Adding a minimum that is above 0 to avoid issues with very low numbers
       Feval <- Fm(X) +1 #Function F evaluated
       pi_F_est[Feval] <- pi_F_est[Feval] + W #Assign estimated weight
-      if(pi_F_est[Feval]==Inf){pi_F_est[Feval] <- .Machine$double.xmax} #Fix huge values
-      fix_dist <- function(pi_F_est){
-        #First fix
-        totalizer <- sum(pi_F_est)
-        if(totalizer==Inf){totalizer <- .Machine$double.xmax}
-        newpi <- pi_F_est/totalizer
-        #recurrent fix
-        while(sum(newpi)==Inf){
-          totalizer <- sum(newpi)
-          if(totalizer==Inf){totalizer <- .Machine$double.xmax}
-          newpi <- newpi/totalizer
-        }
-        return(newpi)
-      }
-      pi_F_est <- fix_dist(pi_F_est)
+      if(!is.finite(pi_F_est[Feval])){pi_F_est[Feval] <- .Machine$double.xmax} #Fix huge values
       
+      pi_F_est <- fix_dist(pi_F_est)
+      totalizer <- sum(pi_F_est)
       if(dist_pi(pi_F_est/totalizer) < threshold){ #Compare true dist with normalized est dist.
         #If the chain converged
         iter_conv <- c(iter_conv,step) #Register number of steps needed
