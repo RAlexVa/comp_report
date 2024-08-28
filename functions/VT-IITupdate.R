@@ -6,7 +6,7 @@
 # Input:
 # pi: Function to return value of unnormalized target distribution
 # X: Vector of size p (Current state)
-# vec_temp: Vector of size J+1 (contains all inverse temperatures in decreasing order)
+# vec_temp: Vector of size J (contains all inverse temperatures in decreasing order)
 # curr_temp: index (Current temperature)
 # temp_neigh: vector indicating the index of temperatures to consider as neighbors
 #             by default is all temperatures except the current one.
@@ -32,7 +32,7 @@ h <- h_func[[curr_temp]] #Balancing function to use depending on the temperature
 #Checking all temperature neighbors
   temprobs <- c()
   for(t in temp_neigh){
-    temp_weight <- h_temp((pi_current^(vec_temp[t]-temp_new)) * (psi[t]/psi[curr_temp]))
+    temp_weight <- h_temp((pi_current^(vec_temp[t]-temp_now)) * (psi[t]/psi[curr_temp]))
     temprobs <- c(temprobs,temp_weight)
   }
   J <- length(temp_neigh)
@@ -43,17 +43,16 @@ h <- h_func[[curr_temp]] #Balancing function to use depending on the temperature
   
   Xnew <- X
   if(index<=p){#If a space neighbor is selected
-    Xnew[index] <- 1-X[index] #Choose neighbor state
-    newtemp <- curr_temp #don't change temperature
+    Xnew[index] <- 1-X[index] #Update state
+    newtemp <- curr_temp #Don't change temperature
   }if(index>p){#If a temperature neighbor is selected
     Xnew <- X #Don't change state
-    newtemp <- index-p
+    newtemp <- index-p #Update temperature index
   }
   
 
 #Compute weight
-  inv_w <- pi_current^(1-temp_now)*phi(curr_temp)/(psi(curr_temp)*sum(joint_probs))
-  weight <- 1/inv_w #Compute weight using mean since we're using uniform dist.
+  weight <- pi_current^(1-temp_now)*phi[curr_temp]/(psi[curr_temp]*sum(joint_probs))
   
 #Update PSI (According to the paper)
   iteration <- i #This comes from outside
