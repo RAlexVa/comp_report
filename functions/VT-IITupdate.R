@@ -16,7 +16,7 @@
 # phi: In this case we just use 1 but it should be a Vector with same size as temperatures to use in the algorithm
 # psi: Vector to use in the algorithm
 # Output: New state choosen proportionally and previous state's weight
-VT_IITupdate <- function(X,curr_temp,pi,h_func,h_temp,p,vec_temp,psi,temp_neigh,phi=1,n_0=100,s_0=100){
+VT_IITupdate <- function(X,curr_temp,pi,h_func,h_temp,p,vec_temp,psi,temp_neigh,phi=1){
 temp_now <- vec_temp[curr_temp] #Temperature now
 h <- h_func[[curr_temp]] #Balancing function to use depending on the temperature
 #Computing weight
@@ -45,10 +45,12 @@ h <- h_func[[curr_temp]] #Balancing function to use depending on the temperature
   if(index<=p){#If a space neighbor is selected
     Xnew[index] <- 1-X[index] #Update state
     newtemp <- curr_temp #Don't change temperature
+    jump <- 'space' #Indicate movement in state
   }
   if(index>p){#If a temperature neighbor is selected
     Xnew <- X #Don't change state
-    newtemp <- index-p #Update temperature index
+    newtemp <- temp_neigh[index-p] #Update temperature index
+    jump <- 'temp' #Indicate movement in temp
   }
   
 
@@ -56,10 +58,10 @@ h <- h_func[[curr_temp]] #Balancing function to use depending on the temperature
   #weight <- pi_current^(1-temp_now)*phi[curr_temp]/(psi[curr_temp]*sum(joint_probs))
   weight <- pi_current^(1-temp_now)/(psi[curr_temp]*sum(joint_probs))
   
-  return(list(Xnew,weight,newtemp,p+J))
+  return(list(Xnew,weight,newtemp,p+J,jump))
 }
 
-update_psi <- function(psi,curr_temp,iteration,J){
+update_psi <- function(psi,curr_temp,iteration,J,n_0=100,s_0=100){
   #Update PSI (According to the paper)
   #decrease current psi
   temp <- psi[curr_temp]*exp(-s_0/(n_0 + iteration))
@@ -74,7 +76,7 @@ update_psi <- function(psi,curr_temp,iteration,J){
 ### adjusting the balancing function accordingly
 ### In case probabilities are exp {something} and the balancing function 
 ### can be easily adapted
-VT_IITupdate_log <- function(X,curr_temp,logpi,logh_func,logh_temp,p,vec_temp,logpsi,temp_neigh,phi=1,n_0=100,s_0=100){
+VT_IITupdate_log <- function(X,curr_temp,logpi,logh_func,logh_temp,p,vec_temp,logpsi,temp_neigh,phi=1){
   temp_now <- vec_temp[curr_temp] #Temperature now
   logh <- logh_func[[curr_temp]] #Balancing function to use depending on the temperature
   #Computing weight
@@ -111,7 +113,7 @@ VT_IITupdate_log <- function(X,curr_temp,logpi,logh_func,logh_temp,p,vec_temp,lo
   }
   if(index>p){#If a temperature neighbor is selected
     Xnew <- X #Don't change state
-    newtemp <- index-p #Update temperature index
+    newtemp <- temp_neigh[index-p] #Update temperature index
     jump <- 'temp' #Indicate movement in temp
   }
   
@@ -122,7 +124,7 @@ VT_IITupdate_log <- function(X,curr_temp,logpi,logh_func,logh_temp,p,vec_temp,lo
   return(list(Xnew,weight,newtemp,p+J,jump))
 }
 
-update_logpsi <- function(logpsi,curr_temp,iteration,J){
+update_logpsi <- function(logpsi,curr_temp,iteration,J,n_0=100,s_0=100){
   #Update PSI (According to the paper)
   #decrease current psi
   temp <- logpsi[curr_temp] - s_0/(n_0 + iteration)
