@@ -9,7 +9,7 @@ source(file.path(getwd(),'functions','IITupdate.R')) #Functions for IIT update
 
 
 
-VT_IIT <- function(num_sim=100,
+VT_IIT <- function(num_sim=50,
                    max_iter=5*10^4,
                    p=200,
                    n=100,
@@ -77,6 +77,7 @@ VT_IIT <- function(num_sim=100,
     for(i in 1:max_iter){
       if(i%%1000==1){print(paste0('VT-IIT (',method,') J=',J,' D=',delta,' sim:',sim,' iter:',i))}
       temp_neigh <- (1:J)[-curr_temp]
+      #start_t <- Sys.time()
       iter <- VT_IITupdate_log(X,
                                curr_temp,
                                logpi=pi.distribution,
@@ -86,7 +87,7 @@ VT_IIT <- function(num_sim=100,
                                vec_temp,
                                logpsi,
                                temp_neigh)
-      
+      #Sys.time()-start_t
       #Register stuff
       row_index <- (max_iter)*(sim-1) + i
       type <- iter[[5]]
@@ -173,8 +174,9 @@ just_IIT <- function(num_sim=100,
     for(i in 1:max_iter){
       if(i%%1000==1){print(paste0('VT-IIT (',method,') J=',J,' D=',delta,' sim:',sim,' iter:',i))}
       temp_neigh <- (1:J)[-curr_temp]
+      #start_t <- Sys.time()
       iter <- IITupdate_log(X,logpi=pi.distribution,logh=h_func,p)
-      
+      #Sys.time()-start_t
       #Register stuff
       row_index <- (max_iter)*(sim-1) + i
 
