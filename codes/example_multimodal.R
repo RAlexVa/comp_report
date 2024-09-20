@@ -9,7 +9,7 @@ source(file.path(getwd(),'functions','IITupdate.R')) #Functions for IIT update
 
 
 
-VT_IIT <- function(num_sim=50,
+VT_IIT <- function(num_sim=100,
                    max_iter=5*10^4,
                    p=200,
                    n=100,
