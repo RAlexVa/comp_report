@@ -3,8 +3,8 @@ library(Rcpp)
 Rcpp::sourceCpp("codes/random_normal.cpp")
 #Rcpp::sourceCpp("codes/loglikelihood.cpp")
 
-
-#Below we compare the computation of liklihood between R and Cpp to see it matches
+########################################
+#Below we compare the computation of likelihood between R and Cpp to see it matches
 res <- random_model(n=100,p=200)
 #Computing likelihood in R
 variables <- c(1:3,9:20)
@@ -15,10 +15,22 @@ logLik(mod)
 #Computing likelihood using Rcpp functions
 logLikelihood(res$X,res$Y,variables-1) #Shift the indexes
 
+###############################################
+#Now computing likelihood without features
+variables <- c()
+data_s <- as.data.frame(cbind(res$Y,res$X[,variables+1]))
+mod <- lm(V1 ~., data=data_s)
+logLik(mod)
+
+###### Testing how to redefine a function by fixing some parameters
+logL_0(res$Y)
 
 
 
-
+cppFunction("double logLikelihood(uvec pos) {
+   bool result = (num % 2 == 1);
+   return result;
+}")
 
 
 
