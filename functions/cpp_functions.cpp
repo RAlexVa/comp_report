@@ -40,7 +40,7 @@ List random_model(int n, int p) {
 double logLikelihood(mat X, colvec Y, uvec pos){
   mat subX = X.cols(pos);
   
-//Manual implementation of linear regresion
+//Manual implementation of linear regression
 //source: https://cran.r-project.org/web/packages/RcppArmadillo/readme/README.html
 int n = X.n_rows;//, k = X.n_cols
 
@@ -51,7 +51,48 @@ double rss = arma::dot(res, res);  //
 double logl = -0.5*(n*log(2*M_PI) + n*log(rss) -n*log(n) + n);
 return logl;
 }
+// [[Rcpp::export]]
+double logL_0(colvec Y){
+  int n = Y.n_rows;
+  vec subX(n,fill::ones);
+  
+  //Manual implementation of linear regression with no features
+  arma::colvec coef = arma::solve(subX, Y);     // fit model y ~ X
+  arma::colvec res  = Y - subX*coef;            // residuals
+  double rss = arma::dot(res, res);  // 
+  
+  double logl = -0.5*(n*log(2*M_PI) + n*log(rss) -n*log(n) + n);
+  return logl;
+}
+
+
+// [[Rcpp::export]]
+List VT_IIT_update_c(vec X, vec temp, uvec curr_temp, mat modelM, vec resY,int n, int t) {
+  // Create the model matrix
+  vec temperature = temp.elem(curr_temp); // Current temperature
+  int total_neighbors = n+t;
+  vec logprobs(total_neighbors, fill::zeros); //log probabilities
+ 
+//Update vector
+ for(int j=0; j<total_neighbors;j++){
+   logprobs(j) = j;
+ }
+ List ret;
+ ret["temp"]=temperature;
+ ret["lprobs"]=logprobs;
+ return ret;
+
+}
+
+
+
 
 /*** R
-
+# VT_IIT_update_c(X=c(1,2),
+#                  temp=c(0.5,0.4,0.1),
+#                  curr_temp=2,
+#                  modelM=matrix(1:4,2,2),
+#                  resY=c(1,2),
+#                  n=30,
+#                  t=5)
 */
