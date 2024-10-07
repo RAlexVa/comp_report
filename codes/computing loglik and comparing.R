@@ -1,12 +1,29 @@
 library(Rcpp)
 
 Rcpp::sourceCpp("codes/random_normal.cpp")
-Rcpp::sourceCpp("codes/loglikelihood.cpp")
+#Rcpp::sourceCpp("codes/loglikelihood.cpp")
 
+
+#Below we compare the computation of liklihood between R and Cpp to see it matches
 res <- random_model(n=100,p=200)
+#Computing likelihood in R
+variables <- c(1:3,9:20)
 data <- as.data.frame(cbind(res$Y,res$X))
-#data_s <- data
-data_s <- data[,c(1:4,10:20)]
+data_s <- data[,c(1,variables+1)] #Include column 1 since it's Y, shift indexes to consider column Y
+mod <- lm(V1 ~.-1, data=data_s)
+logLik(mod)
+#Computing likelihood using Rcpp functions
+logLikelihood(res$X,res$Y,variables-1) #Shift the indexes
+
+
+
+
+
+
+
+
+
+
 
 set.seed(234)
 lm_r <- function(n,p){
