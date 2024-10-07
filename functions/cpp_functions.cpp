@@ -53,25 +53,5 @@ return logl;
 }
 
 /*** R
-#logLikelihood(res$X,res$Y,c(1:3,9:19)-1)
-# set.seed(123)
-# m <- random_norm(5,4)
-# set.seed(123)
-# tod <- random_model(4,8)
-# 
-# r_mod_r <- function(n,p){
-#   ##### Defining model #####
-#   L <- matrix(rnorm(n*p),nrow=n,ncol=p)
-#   
-#   beta <- runif(1,4,6)*sqrt(log(p)/n)
-#   Y <- (L[,1]+L[,2]+L[,3])*beta + rnorm(n,mean=0,sd=0.5)
-#   # Introducing multi modality
-#   L[,4] <- L[,2]-L[,3]+rnorm(n,mean=0,sd=0.1)
-#   L[,5] <- L[,1]+L[,2]+L[,3]+L[,6]+L[,7]+rnorm(n,mean=0,sd=0.1)
-#   L[,8] <- L[,6]-L[,7]+rnorm(n,mean=0,sd=0.1)
-#   return(L)
-# }
-# 
-# microbenchmark(random_full(100,200),r_mod_r(100,200),times=200)
 
 */
