@@ -267,6 +267,10 @@ vec Simulation_mod1(int n, int p, int numsim, int numiter, vec temp,int t){
     vec logpsi(t, fill::zeros); // Initialize vector logpsi, as many entries as temperatures
     //Starts simulation
     for(int i=0;i<numiter;i++){
+      if (i % 1000 == 1) {  // equivalent to i%%1000==1 in R
+        
+        Rcpp::Rcout << "Simulation: " << s << "Iteration: " << i << std::endl;
+      }
       // Rcpp::Rcout << "Starts iteration  "<< i<<std::endl; 
       double n_double = double(p);
       double t_double = double(t);
