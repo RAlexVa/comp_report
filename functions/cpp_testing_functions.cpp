@@ -170,6 +170,32 @@ uvec check_ones(vec X){
   return pos;
 }
 
+
+// [[Rcpp::export]]
+int check_modes(const arma::vec& X) {
+  // Defined modes
+  arma::vec mod1 = {0, 1, 2};
+  arma::vec mod2 = {0, 1, 3};
+  arma::vec mod3 = {0, 2, 3};
+  arma::vec mod4 = {4, 5, 6};
+  arma::vec mod5 = {4, 5, 7};
+  arma::vec mod6 = {4, 6, 7};
+  
+  // Collect vectors into a list
+  std::vector<arma::vec> modes = {mod1, mod2, mod3, mod4, mod5, mod6};
+  
+  vec pos=conv_to<vec>::from(find(X==1));
+  for (size_t i = 0; i < modes.size(); i++) {
+    //Rcpp::Rcout << modes[i]<< std::endl;
+    if (arma::approx_equal(pos, modes[i], "absdiff", 0)) {  // Exact comparison
+      return i; // Return true if X is equal to any model
+    }
+  }
+  return -1; // Return false if X does not match any model
+}
+
+
+
 //////////////////////////////////
 //Some useful links
 
