@@ -65,3 +65,123 @@ lm_cpp(100,200)
 microbenchmark(lm_r(100,200),lm_cpp(100,200))
 
 
+
+######################################################
+#This was in the cpp_functions file before
+#rm(list=ls())
+n <- 10
+p <- 15
+set.seed(134)
+#res <- random_model(n,p)
+
+temp <- c(1,1.2,2.3,3.5,3.9,4)
+logpsi <- c(1,2,3,4,5,6)
+length(temp)==length(logpsi)
+#Simulation_mod1(n=n,p=p,numsim=2,numiter=2,temp=temp,t=length(temp))
+
+
+X <- c(0,1,0,rep(0,12))
+
+curr_temp <- 3
+set.seed(134)
+(check <- VT_IIT_update_c1(X=X,
+                           temp=temp,
+                           curr_temp=curr_temp,
+                           modelX=res$X,
+                           resY=res$Y,
+                           n=length(X),
+                           t=length(temp),
+                           logpsi=logpsi)) #number of temperatures
+
+# update_logpsi(c(1,2,3,4,5),2,10,5)
+
+# library(dplyr)
+# set.seed(134)
+# temperature <- temp[curr_temp+1]
+# coord <- which(X==1)+1
+# t <- length(temp)
+# logpi_r <- c(p+t)
+# data <- as.data.frame(cbind(res$Y,res$X))
+# logpi_current <- logLik(lm(V1 ~.-1, data=as.data.frame(data[,c(1,coord)])))[1]
+# for(i in 1:p){
+#   Xnew <- X;
+#   Xnew[i] <- 1-X[i];
+#   variables <- which(Xnew==1);
+#   if(length(variables)==0){
+#     data_s <- data |>  select('V1');
+#     mod <- lm(V1 ~., data=data_s)
+#   }else{
+#     data_s <- data[,c(1,variables+1)] #Include column 1 since it's Y, shift indexes to consider column Y
+#     mod <- lm(V1 ~.-1, data=data_s)
+#   }
+# logpi_r[i] <- exp(min((logLik(mod)[1] - logpi_current)*temperature,0))/length(X)
+# }
+# for(i in 1:t){
+#   if(temp[i]==temperature){logpi_r[p+i] <- 0}else{
+#   logpi_r[p+i] <- exp(min(logpi_current*(temp[i]-temperature),0))/(length(temp)-1)
+# }}
+# logpi_r
+# u <- runif(p+t)
+# which.min(-log(u)/logpi_r)
+
+
+### Compare
+# fun_dummy_1 <- function(X=X,
+#                         temp=temp,
+#                         curr_temp=curr_temp,
+#                         modelX=res$X,
+#                         resY=res$Y,
+#                         n=length(X),
+#                         t=length(temp)){
+#   return(VT_IIT_update_c1(X=X,
+#                           temp=temp,
+#                           curr_temp=curr_temp,
+#                           modelX=res$X,
+#                           resY=res$Y,
+#                           n=length(X),
+#                           t=length(temp)))
+# }
+# 
+# fun_dummy_2 <- function(X=X,
+#                         temp=temp,
+#                         curr_temp=curr_temp,
+#                         modelX=res$X,
+#                         resY=res$Y,
+#                         n=length(X),
+#                         t=length(temp)){
+#   temperature <- temp[curr_temp+1]
+#   coord <- which(X==1)+1
+#   t <- length(temp)
+#   logpi_r <- c(p+t)
+#   data <- as.data.frame(cbind(res$Y,res$X))
+#   logpi_current <- logLik(lm(V1 ~.-1, data=as.data.frame(data[,c(1,coord)])))[1]
+#   for(i in 1:p){
+#     Xnew <- X;
+#     Xnew[i] <- 1-X[i];
+#     variables <- which(Xnew==1);
+#     if(length(variables)==0){
+#       data_s <- data |>  select('V1');
+#       mod <- lm(V1 ~., data=data_s)
+#     }else{
+#       data_s <- data[,c(1,variables+1)] #Include column 1 since it's Y, shift indexes to consider column Y
+#       mod <- lm(V1 ~.-1, data=data_s)
+#     }
+#     logpi_r[i] <- exp(min((logLik(mod)[1] - logpi_current)*temperature,0))/length(X)
+#   }
+#   for(i in 1:t){
+#     if(temp[i]==temperature){logpi_r[p+i] <- 0}else{
+#       logpi_r[p+i] <- exp(min(logpi_current*(temp[i]-temperature),0))/(length(temp)-1)
+#     }}
+#   logpi_r
+#   
+#   u <- runif(p+t)
+#   
+#   index_n <- which.min(-log(u)/logpi_r)
+#   if(index_n<=p){X[index_n] <- 1-X[index_n]}else{
+#     temperature = temp[index_n-p]
+#   }
+#   
+#   return(list(temperature,logpi_r,X,))
+# }
+# 
+# microbenchmark(fun_dummy_1, fun_dummy_2, times=1000)
