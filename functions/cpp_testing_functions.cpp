@@ -34,6 +34,35 @@ List random_model(int n, int p) {
   return ret;
 }
 
+double logLikelihood(mat X, colvec Y, uvec pos){
+  mat subX = X.cols(pos);
+  
+  //Manual implementation of linear regression
+  //source: https://cran.r-project.org/web/packages/RcppArmadillo/readme/README.html
+  int n = X.n_rows;//, k = X.n_cols
+  
+  arma::colvec coef = arma::solve(subX, Y);     // fit model y ~ X
+  arma::colvec res  = Y - subX*coef;            // residuals
+  double rss = arma::dot(res, res);  // 
+  
+  double logl = -0.5*(n*log(2*M_PI) + n*log(rss) -n*log(n) + n);
+  return logl;
+}
+//Return the loglikelihood when there are no covariates selected
+// [[Rcpp::export]]
+double logL_0(colvec Y){
+  int n = Y.n_rows;
+  vec subX(n,fill::ones);
+  
+  //Manual implementation of linear regression with no features
+  arma::colvec coef = arma::solve(subX, Y);     // fit model y ~ X
+  arma::colvec res  = Y - subX*coef;            // residuals
+  double rss = arma::dot(res, res);  // 
+  
+  double logl = -0.5*(n*log(2*M_PI) + n*log(rss) -n*log(n) + n);
+  return logl;
+}
+
 
 //Below function works with loglikelihood
 // This is the update for method 1
@@ -135,6 +164,11 @@ vec test_vec(int t){
   return vector;
 }
 
+// [[Rcpp::export]]
+uvec check_ones(vec X){
+  uvec pos=find(X==1);
+  return pos;
+}
 
 //////////////////////////////////
 //Some useful links
