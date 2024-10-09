@@ -167,6 +167,7 @@ vec Simulation_mod1(int n, int p, int numsim, int numiter, vec temp,int t){
   // Attempt to create a single function that does everything
   //Rcpp::Rcout << "Starts function "<< std::endl;
 // Repeats according to the number of simulations
+/////////////////////////////////////////////////////
 for(int s=0; s<numsim;s++){
   //Rcpp::Rcout << "Starts simulation number  "<< s<<std::endl;
   // Creates model
@@ -195,7 +196,7 @@ for(int s=0; s<numsim;s++){
 //Then we start the for loop to run over iterations
 vec X(p,fill::zeros); // The starting state of all simulations is a vector full of zeroes
 // Rcpp::Rcout << "Creates vector of 0  "<< X<<std::endl;
-uvec curr_temp = "0"; // We start in the very first temperature (which should be 1)
+int curr_temp = 0; // We start in the very first temperature (which should be 1)
 // Rcpp::Rcout << "Defines initial temperature "<< curr_temp<<std::endl;
 vec logpsi(t, fill::zeros); // Initialize vector logpsi, as many entries as temperatures
 //Starts simulation
@@ -205,7 +206,7 @@ for(int i=0;i<numiter;i++){
   double t_double = double(t);
   
   // Create the model matrix
-  double temperature = conv_to<double>::from(temp.elem(curr_temp)); // Current temperature
+  double temperature = conv_to<double>::from(temp.row(curr_temp)); // Current temperature
   
   int total_neighbors = n+t;
   vec probs(total_neighbors, fill::zeros); //probabilities
@@ -246,7 +247,8 @@ for(int i=0;i<numiter;i++){
     //Usually we deleted the entry for the current temperature
     //But it's easier just to assign a probability 0 to choose it
     if(temp_nei==temperature){probs(j)=0;}else{//
-      temporal=(logpi_current*(temp_nei-temperature));
+      // temporal=(logpi_current*(temp_nei-temperature)); //This was without the logpsi factors
+      temporal=(logpi_current*(temp_nei-temperature) + conv_to<double>::from(logpsi.row(j-n))-conv_to<double>::from(logpsi.row(curr_temp)));
       if(temporal<0){probs(j) = (exp(temporal)/(t_double-1));}else{probs(j)=(1/(t_double-1));}}
   }
   
@@ -262,13 +264,17 @@ for(int i=0;i<numiter;i++){
   if(neigh_pos<n){
     X.row(neigh_pos) = 1-X.row(neigh_pos); //modify the coordinate of the chosen neighbor
   }else{
-    temperature = neigh_pos-n; //Update the temperature
+    curr_temp = neigh_pos-n; //Update the temperature
   }
-  Rcpp::Rcout << "Finish iteration "<< i << " of simulation "<< s << std::endl;
-  Rcpp::Rcout << "X= "<< X << std::endl;
-  Rcpp::Rcout << "temp= "<< temperature << std::endl;
+  logpsi = update_logpsi(logpsi,curr_temp,double(i),t-1);
+  // Rcpp::Rcout << logpsi << std::endl;
+  //update_logpsi(vec logpsi, int curr_temp, double iteration, int J)
+  // Rcpp::Rcout << "Finish iteration "<< i << " of simulation "<< s << std::endl;
+  // Rcpp::Rcout << "X= "<< X << std::endl;
+  // Rcpp::Rcout << "temp= "<< temperature << std::endl;
   
 }// End of for loop for iterations
+Rcpp::Rcout << "Finish simulation "<< s << std::endl;
 }//End of for loop for simulations
 
 return temp;
@@ -286,3 +292,6 @@ return temp;
 // COnvert vectors from Rcpp to armadillo
 // https://statisticsglobe.com/convert-vector-from-rcpparmadillo-to-rcpp-r
 
+// To subset from a vector, 
+// If i'm using uvec I need to use v.elem()
+//If im using int I need to use v.row()
