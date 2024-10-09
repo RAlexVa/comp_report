@@ -119,10 +119,12 @@ double temporal=0;
    //Usually we deleted the entry for the current temperature
    //But it's easier just to assign a probability 0 to choose it
    if(temp_nei==temperature){probs(j)=0;}else{//
-     temporal=(logpi_current*(temp_nei-temperature) + conv_to<double>::from(logpsi.row(j-n))-conv_to<double>::from(temp.elem(curr_temp)));
+     temporal=(logpi_current*(temp_nei-temperature) + conv_to<double>::from(logpsi.row(j-n))-conv_to<double>::from(logpsi.elem(curr_temp)));
+      // Rcpp::Rcout << temporal << std::endl;
+      // Rcpp::Rcout << logpi_current*(temp_nei-temperature) << std::endl;
      if(temporal<0){probs(j) = (exp(temporal)/(t_double-1));}else{probs(j)=(1/(t_double-1));}}
  }
- 
+ // Rcpp::Rcout << probs << std::endl;
  //Choose the next neighbor
  vec u = Rcpp::runif(n+t);
  vec probs_choose = -log(u)/probs;
