@@ -48,12 +48,41 @@ vec update_logpsi(vec logpsi, int curr_temp, double iteration, int J){
   return(logpsi);
 }
 
+// Function to identify if one of the 6 modes were visited
+// [[Rcpp::export]]
+int check_modes(const arma::vec& X) {
+  // Defined modes
+  arma::vec mod1 = {0, 1, 2};
+  arma::vec mod2 = {0, 1, 3};
+  arma::vec mod3 = {0, 2, 3};
+  arma::vec mod4 = {4, 5, 6};
+  arma::vec mod5 = {4, 5, 7};
+  arma::vec mod6 = {4, 6, 7};
+  
+  // Collect vectors into a list
+  std::vector<arma::vec> modes = {mod1, mod2, mod3, mod4, mod5, mod6};
+  
+  vec pos=conv_to<vec>::from(find(X==1));
+  for (size_t i = 0; i < modes.size(); i++) {
+    //Rcpp::Rcout << modes[i]<< std::endl;
+    if (arma::approx_equal(pos, modes[i], "absdiff", 0)) {  // Exact comparison
+      return i; // Return true if X is equal to any model
+    }
+  }
+  return -1; // Return false if X does not match any model
+}
 
 // [[Rcpp::export]]
+// This function keeps returns all the trajectory for the process considering all iterations
+//But only considers the latest simulation, for every new s the output is refreshed
 List Simulation_mod1(int n, int p, int numsim, int numiter, vec temp,int t){
   // Attempt to create a single function that does everything
   //Rcpp::Rcout << "Starts function "<< std::endl;
-//////////////////////////////////////////////////  
+//////////////////////////////////////////////////
+// Define modes to check how many times they're visited
+//modes are: 1,2,3;  1,2,4; 1,3,4; 5,6,7; 5,6,8; 5,7,8;
+
+
   //To store the results
   mat states_visited(numiter,p);//Matrix to store the states visited
   vec temps_visited(numiter);//Vector to store the temperatures visited
@@ -166,6 +195,7 @@ for(int i=0;i<numiter;i++){
 // Update logpsi vector
   logpsi = update_logpsi(logpsi,curr_temp,double(i),t-1);
   // Rcpp::Rcout << logpsi << std::endl;
+  
   //update_logpsi(vec logpsi, int curr_temp, double iteration, int J)
   // Rcpp::Rcout << "Finish iteration "<< i << " of simulation "<< s << std::endl;
   // Rcpp::Rcout << "X= "<< X << std::endl;
