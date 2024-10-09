@@ -1,6 +1,6 @@
 library(Rcpp)
 
-Rcpp::sourceCpp("codes/random_normal.cpp")
+Rcpp::sourceCpp("functions/cpp_functions.cpp")
 #Rcpp::sourceCpp("codes/loglikelihood.cpp")
 
 ########################################
