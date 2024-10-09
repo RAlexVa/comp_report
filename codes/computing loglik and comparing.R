@@ -68,6 +68,8 @@ microbenchmark(lm_r(100,200),lm_cpp(100,200))
 
 ######################################################
 #This was in the cpp_functions file before
+# library(Rcpp)
+Rcpp::sourceCpp("functions/cpp_functions.cpp")
 #rm(list=ls())
 n <- 10
 p <- 15
@@ -76,9 +78,34 @@ set.seed(134)
 
 temp <- c(1,1.2,2.3,3.5,3.9,4)
 logpsi <- c(1,2,3,4,5,6)
+logpsi2 <- rep(0,6)
 length(temp)==length(logpsi)
-#Simulation_mod1(n=n,p=p,numsim=2,numiter=2,temp=temp,t=length(temp))
+set.seed(134)
 
+n <- 100
+p <- 200
+set.seed(134)
+before <- Sys.time()
+test_1 <- Simulation_mod1(n=n,p=p,numsim=1,numiter=1000,temp=temp,t=length(temp))
+Sys.time()-before
+dim(test_1$states)
+dim(test_1$temps)
+dim(test_1$logpsi)
+
+
+#Modes that 
+visited <- test_1$states
+
+#Checks
+table(check_temp)
+which(check_temp!=0)[1:3] #Where temperature changed from 0
+which(check_temp>1)[1:3] #Where temperature reached 2
+check_temp[29:40]
+rowSums(visited[29:40,])
+identical(visited[29,],visited[30,])
+identical(visited[30,],visited[31,]) #Ok since we changed temperature from 0 to 1
+identical(visited[31,],visited[32,]) #Ok since we changed temperature from 1 to 0
+identical(visited[32,],visited[33,]) #Ok since we didn't change temperature
 
 X <- c(0,1,0,rep(0,12))
 
@@ -92,6 +119,15 @@ set.seed(134)
                            n=length(X),
                            t=length(temp),
                            logpsi=logpsi)) #number of temperatures
+
+
+
+test_vec(10)
+
+ma <- matrix(0,nrow=p,ncol=p)
+X_input <- rep(0,p);
+#mat test_mat(mat M, vec X, vec t, int curr_temp, int p)
+test_mat(ma,X_input,p)
 
 # update_logpsi(c(1,2,3,4,5),2,10,5)
 
