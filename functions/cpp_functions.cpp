@@ -650,3 +650,96 @@ mat Simulation_mod3(int n, int p, int numsim, int numiter, vec temp,int t){
   }//End of for loop for simulations
   return modes_visited;
 }//End of function
+
+// This function reports which modes were visited in which iteration and the temperature
+// This is for model 3 which uses min only in temperature J and sq balancing function for every other
+// [[Rcpp::export]]
+vec Simulation_mod_IIT(int n, int p, int numsim, int numiter){
+  // Attempt to create a single function that does everything
+  
+  //////////////////////////////////////////////////
+  vec modes_visited(numiter * numsim);//Matrix to store the modes visited and temperature
+  double p_double = double(p);// 
+  // Repeats according to the number of simulations
+  /////////////////////////////////////////////////////
+  for(int s=0; s<numsim;s++){
+    //Rcpp::Rcout << "Starts simulation number  "<< s<<std::endl;
+    //// Creates model
+    // Create the model matrix X and response Y
+    mat modelX(n,p); // n rows and p columns (p corresponds to the dimension of the problem)
+    vec resY(n);
+    vec beta;
+    // Define beta
+    beta = Rcpp::runif(1);
+    beta = (4+(beta*2))*sqrt(log(p)/n);
+    for(int j=0; j<p;j++){
+      modelX.col(j) = as<vec>(Rcpp::rnorm(n));
+    }
+    // Define response
+    resY= ((modelX.col(0) + modelX.col(1) + modelX.col(2))*beta) + as<vec>(Rcpp::rnorm(n));
+    
+    //Create multi modality
+    modelX.col(3) = modelX.col(1)-modelX.col(2)+as<vec>(Rcpp::rnorm(n));
+    modelX.col(4) = modelX.col(0)+modelX.col(1)+modelX.col(2)+modelX.col(5)+modelX.col(6)+as<vec>(Rcpp::rnorm(n));
+    modelX.col(7) = modelX.col(5)-modelX.col(6)+as<vec>(Rcpp::rnorm(n));
+    // Rcpp::Rcout << "Model defined  "<< modelX<<std::endl; 
+    // Rcpp::Rcout << "Model defined  "<< resY<<std::endl; 
+    // Here we have the model defined for iteration #s
+    
+    ///////////////////////////////////////////////////////////////////////////
+    //Then we start the for loop to run over iterations
+    vec X(p,fill::zeros); // The starting state of all simulations is a vector full of zeroes
+    //Starts simulation
+    for(int i=0;i<numiter;i++){
+      if (i % 1000 == 1) {Rcpp::Rcout << "Simulation: " << s << " Iteration: " << i << std::endl;}
+      int total_neighbors = p; // total number of neighbors is p spacial + t temperature
+      vec probs(total_neighbors, fill::zeros); //probabilities
+      // Compute likelihood of the current state
+      double logpi_current=0;
+      uvec current_coord = find(X==1);
+      if(sum(current_coord)==0){ // If the current state is all zeros
+        logpi_current=logL_0(resY);
+      }else{ // If the current state is not all zeroes
+        logpi_current = logLikelihood(modelX,resY,current_coord);
+      }
+      ////////////      
+      //Compute weight for spatial neighbors
+      double temporal=0;
+      vec newX;
+      for(int j=0; j<p;j++){
+        // Rcpp::Rcout << "Starts checking neighbors  "<< j<<std::endl; 
+        newX = X;
+        newX.row(j) = 1-X.row(j);
+        //Rcpp::Rcout << newX << std::endl;
+        uvec coord = find(newX==1);
+        //Rcpp::Rcout << coord << std::endl;
+        if(sum(coord)==0){// In case the state visited is all 0s
+          temporal=(logL_0(resY)-logpi_current);
+        }else{// For every other state that is not all 0s
+          temporal=((logLikelihood(modelX,resY,coord)-logpi_current));
+        }
+        //Apply balancing function to spatial neighbors /////////////////////////////
+          probs(j)=exp(temporal/2)/p_double;
+      }
+      ////////////      
+ 
+      //Choose the next neighbor
+      vec u = Rcpp::runif(p);
+      vec probs_choose = -log(u)/probs;
+      
+      //Find the index of the minimum element. source:https://gallery.rcpp.org/articles/vector-minimum/
+      //This corresponds to choosing that neighbor
+      int neigh_pos = (std::min_element(probs_choose.begin(), probs_choose.end()))-probs_choose.begin();
+      // Rcpp::Rcout << neigh_pos << std::endl;
+      
+      X.row(neigh_pos) = 1-X.row(neigh_pos); //modify the coordinate of the chosen neighbor
+
+      // Store the new values to report
+      modes_visited.row((s*numiter)+i)=check_modes(X)+1;
+
+    }// End of for loop for iterations
+    // Rcpp::Rcout << "Finish simulation "<< s << std::endl;
+    // Rcpp::Rcout << "X= "<< X << std::endl;
+  }//End of for loop for simulations
+  return modes_visited;
+}//End of function
