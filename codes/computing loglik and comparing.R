@@ -82,11 +82,26 @@ logpsi2 <- rep(0,6)
 length(temp)==length(logpsi)
 set.seed(134)
 
+####Checking latest function
+Rcpp::sourceCpp("functions/cpp_functions.cpp")
+n <- 100
+p <- 200
+set.seed(134)
+temp1.1 <- (1+((1:5)-1))
+temp1.2 <- (1+((1:10)-1))
+temp2.1 <- (1+((1:5)-1)*2)
+temp2.2 <- (1+((1:10)-1)*2)
+temp <- temp1.1
+test_1 <- Simulation_mod1(n=n,p=p,numsim=1,numiter=1002,temp=temp,t=length(temp))
+
+test_2 <- Simulation_mod1(n=n,p=p,numsim=2,numiter=100,temp=temp,t=length(temp))
+test_3 <- Simulation_mod1(n=n,p=p,numsim=5,numiter=5000,temp=temp,t=length(temp))
+
 n <- 100
 p <- 200
 set.seed(134)
 before <- Sys.time()
-test_1 <- Simulation_mod1(n=n,p=p,numsim=1,numiter=1000,temp=temp,t=length(temp))
+test_1 <- Simulation_mod1_full(n=n,p=p,numsim=1,numiter=1000,temp=temp,t=length(temp))
 Sys.time()-before
 dim(test_1$states)
 dim(test_1$temps)
@@ -106,6 +121,28 @@ identical(visited[29,],visited[30,])
 identical(visited[30,],visited[31,]) #Ok since we changed temperature from 0 to 1
 identical(visited[31,],visited[32,]) #Ok since we changed temperature from 1 to 0
 identical(visited[32,],visited[33,]) #Ok since we didn't change temperature
+
+
+
+
+
+
+Rcpp::sourceCpp("functions/cpp_testing_functions.cpp")
+
+check_ones(c(1,0,0,0,0,1,0,1,1,0,0,1,0,1))
+check_modes(c(1,0,1,0))
+
+check_modes(c(1,0,1,0,0,0,0,1,1,1,1))
+
+check_modes(c(1,1,1,0,0,0,0,0,0,1,1,1,1))
+check_modes(c(1,1,1,0,0,0,0,0,0,0))
+check_modes(c(1,1,0,1,0,0,0,0,0,0))
+check_modes(c(1,0,1,1,0,0,0,0,0,0))
+check_modes(c(0,0,0,0,1,1,1))
+check_modes(c(0,0,0,0,1,1,0,1))
+check_modes(c(0,0,0,0,1,0,1,1))
+
+
 
 X <- c(0,1,0,rep(0,12))
 
