@@ -43,4 +43,4 @@ if(m_selected==0){
   results <- Simulation_mod3(n=n,p=p,numsim=simulations,numiter=iterations,temp=temp,t=length(temp))
 }else{print('Incorrect model selected')}
 
-write.csv(results,paste0('results/','resultados_modelo',m_selected,'_temp_',t_selected,'_seed_',seed_def,'.csv'),row.names=F)
+write.csv(results,paste0('results/','resultados_VT-IIT_modelo',m_selected,'_temp_',t_selected,'_seed_',seed_def,'.csv'),row.names=F)
