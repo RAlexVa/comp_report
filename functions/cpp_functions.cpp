@@ -224,13 +224,8 @@ List ret;
 //But only considers the latest simulation, for every new s the output is refreshed
 vec Simulation_mod1(int n, int p, int numsim, int numiter, vec temp,int t){
   // Attempt to create a single function that does everything
-  //Rcpp::Rcout << "Starts function "<< std::endl;
+
   //////////////////////////////////////////////////
-  // Define modes to check how many times they're visited
-  //modes are: 1,2,3;  1,2,4; 1,3,4; 5,6,7; 5,6,8; 5,7,8;
-  
-  
-  //To store the results
   vec modes_visited(numiter * numsim);//Vector to store the modes visited
   // Repeats according to the number of simulations
   /////////////////////////////////////////////////////
@@ -267,20 +262,15 @@ vec Simulation_mod1(int n, int p, int numsim, int numiter, vec temp,int t){
     vec logpsi(t, fill::zeros); // Initialize vector logpsi, as many entries as temperatures
     //Starts simulation
     for(int i=0;i<numiter;i++){
-      if (i % 1000 == 1) {  // equivalent to i%%1000==1 in R
-        
-        Rcpp::Rcout << "Simulation: " << s << "Iteration: " << i << std::endl;
-      }
+      if (i % 1000 == 1) {Rcpp::Rcout << "Simulation: " << s << "Iteration: " << i << std::endl;}
       // Rcpp::Rcout << "Starts iteration  "<< i<<std::endl; 
       double n_double = double(p);
       double t_double = double(t);
-      
-      // Create the model matrix
+
       double temperature = conv_to<double>::from(temp.row(curr_temp)); // Current temperature
       
       int total_neighbors = n+t;
       vec probs(total_neighbors, fill::zeros); //probabilities
-      
       // Compute likelihood of the current state
       double logpi_current=0;
       uvec current_coord = find(X==1);
@@ -289,7 +279,7 @@ vec Simulation_mod1(int n, int p, int numsim, int numiter, vec temp,int t){
       }else{ // If the current state is not all zeroes
         logpi_current = logLikelihood(modelX,resY,current_coord);
       }
-      
+////////////      
       //Compute weight for spatial neighbors
       double temporal=0;
       for(int j=0; j<n;j++){
@@ -299,17 +289,15 @@ vec Simulation_mod1(int n, int p, int numsim, int numiter, vec temp,int t){
         //Rcpp::Rcout << newX << std::endl;
         uvec coord = find(newX==1);
         //Rcpp::Rcout << coord << std::endl;
-        if(sum(coord)==0){
+        if(sum(coord)==0){// In case the state visited is all 0s
           temporal=(logL_0(resY)-logpi_current)*temperature;
-          // Rcpp::Rcout << "all zeroes "<<temporal << std::endl;
-          if(temporal<0){probs(j) =exp(temporal)/n_double;}else{probs(j) =1/n_double;}
-        }else{
+        }else{// For every other state that is not all 0s
           temporal=((logLikelihood(modelX,resY,coord)-logpi_current)*temperature);
-          // Rcpp::Rcout << sum(coord) <<" coordinates "<< temporal << 1/n_double << "que esta pasando" <<std::endl;
-          if(temporal<0){probs(j) = exp(temporal)/n_double;}else{probs(j) =1/n_double;}
         }
+//Apply balancing function to spatial neighbors /////////////////////////////        
+if(temporal<0){probs(j) = exp(temporal)/n_double;}else{probs(j) =1/n_double;} 
       }
-      
+////////////      
       // Compute weight for temperature neighbors
       double temp_nei = 0;
       for(int j=n; j<n+t;j++){
@@ -319,7 +307,9 @@ vec Simulation_mod1(int n, int p, int numsim, int numiter, vec temp,int t){
         if(temp_nei==temperature){probs(j)=0;}else{//
           // temporal=(logpi_current*(temp_nei-temperature)); //This was without the logpsi factors
           temporal=(logpi_current*(temp_nei-temperature) + conv_to<double>::from(logpsi.row(j-n))-conv_to<double>::from(logpsi.row(curr_temp)));
-          if(temporal<0){probs(j) = (exp(temporal)/(t_double-1));}else{probs(j)=(1/(t_double-1));}}
+//Apply balancing function to temperature neighbors /////////////////////////////           
+          if(temporal<0){probs(j) = (exp(temporal)/(t_double-1));}else{probs(j)=(1/(t_double-1));}
+          }
       }
       
       //Choose the next neighbor
