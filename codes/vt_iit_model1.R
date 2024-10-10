@@ -1,5 +1,6 @@
 if(!require('Rcpp')){install.packages('Rcpp')}
 library(Rcpp)
+library(RcppArmadillo)
 setwd('..')
 Rcpp::sourceCpp("functions/cpp_functions.cpp")
 
