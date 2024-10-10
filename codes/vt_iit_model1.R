@@ -5,7 +5,8 @@ setwd('..')
 Rcpp::sourceCpp("functions/cpp_functions.cpp")
 
 #Define parameters for the model
-set.seed(202459)
+seed_def <- as.numeric(readline('define seed'))
+set.seed(seed_def)
 n <- 100
 p <- 200
 iterations <- 50000
@@ -33,13 +34,13 @@ if(t_selected==1){
 writeLines('method 0 is IIT\nmethod 1 min bal. fun. for all\nmethod 2 half & half bal. fun.\nmethod 3 only max temp is different')
 m_selected <- as.numeric(readline('Select method'))
 if(m_selected==0){
-  
+  results <- Simulation_mod_IIT(n=n,p=p,numsim=simulations,numiter=iterations)  
 }else if(m_selected==1){
   results <- Simulation_mod1(n=n,p=p,numsim=simulations,numiter=iterations,temp=temp,t=length(temp))  
 }else if(m_selected==2){
-  
+  results <- Simulation_mod2(n=n,p=p,numsim=simulations,numiter=iterations,temp=temp,t=length(temp))
 }else if(m_selected==3){
-  
+  results <- Simulation_mod3(n=n,p=p,numsim=simulations,numiter=iterations,temp=temp,t=length(temp))
 }else{print('Incorrect model selected')}
 
-write.csv(results,paste0('results/','resultados_modelo',m_selected,'_temp_',t_selected,'.csv'),row.names=F)
+write.csv(results,paste0('results/','resultados_modelo',m_selected,'_temp_',t_selected,'_seed_',seed_def,'.csv'),row.names=F)
