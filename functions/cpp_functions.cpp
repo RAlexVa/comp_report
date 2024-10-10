@@ -220,13 +220,12 @@ List ret;
 }//End of function
 
 // [[Rcpp::export]]
-// This function keeps returns all the trajectory for the process considering all iterations
-//But only considers the latest simulation, for every new s the output is refreshed
-vec Simulation_mod1(int n, int p, int numsim, int numiter, vec temp,int t){
+// This function reports which modes were visited in which iteration
+mat Simulation_mod1(int n, int p, int numsim, int numiter, vec temp,int t){
   // Attempt to create a single function that does everything
 
   //////////////////////////////////////////////////
-  vec modes_visited(numiter * numsim);//Vector to store the modes visited
+  mat modes_visited(numiter * numsim,2);//Matrix to store the modes visited and temperature
   // Repeats according to the number of simulations
   /////////////////////////////////////////////////////
   for(int s=0; s<numsim;s++){
@@ -256,7 +255,11 @@ vec Simulation_mod1(int n, int p, int numsim, int numiter, vec temp,int t){
     ///////////////////////////////////////////////////////////////////////////
     //Then we start the for loop to run over iterations
     vec X(p,fill::zeros); // The starting state of all simulations is a vector full of zeroes
-    // Rcpp::Rcout << "Creates vector of 0  "<< X<<std::endl;
+    // X.row(0)=1;
+    // X.row(1)=1;
+    // X.row(2)=1;
+     // Rcpp::Rcout << "Creates initial vector  "<< X<<std::endl;
+     // Rcpp::Rcout << "Check modes initial  "<< check_modes(X)<<std::endl;
     int curr_temp = 0; // We start in the very first temperature (which should be 1)
     // Rcpp::Rcout << "Defines initial temperature "<< curr_temp<<std::endl;
     vec logpsi(t, fill::zeros); // Initialize vector logpsi, as many entries as temperatures
@@ -338,7 +341,10 @@ if(temporal<0){probs(j) = exp(temporal)/n_double;}else{probs(j) =1/n_double;}
       
       
       // Store the new values to report
-      modes_visited.row((s*numiter)+i)=check_modes(X)+1;
+      // modes_visited.row((s*numiter)+i)=check_modes(X)+1;
+      // Rcpp::Rcout << "modes "<< check_modes(X) << std::endl;
+      modes_visited.submat((s*numiter)+i,0,(s*numiter)+i,0)=check_modes(X)+1;
+      modes_visited.submat((s*numiter)+i,1,(s*numiter)+i,1)=curr_temp+1;
     }// End of for loop for iterations
     // Rcpp::Rcout << "Finish simulation "<< s << std::endl;
     // Rcpp::Rcout << "X= "<< X << std::endl;
