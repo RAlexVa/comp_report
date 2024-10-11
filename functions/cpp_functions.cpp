@@ -156,7 +156,7 @@ mat Simulation_mod1(int n, int p, int numsim, int numiter, vec temp,int t){
           temporal=((logLikelihood(modelX,resY,coord)-logpi_current)*temperature);
         }
 //Apply balancing function to spatial neighbors /////////////////////////////        
-if(temporal<0){probs(j) = exp(temporal)/p_double;}else{probs(j) =1/p_double;} 
+if(temporal<0){probs(j) = temporal-log(p_double);}else{probs(j) = -log(p_double);} 
       }
 ////////////      
       // Compute weight for temperature neighbors
@@ -173,14 +173,14 @@ if(temporal<0){probs(j) = exp(temporal)/p_double;}else{probs(j) =1/p_double;}
           // temporal=(logpi_current*(temp_nei-temperature)); //This was without the logpsi factors
           temporal=(logpi_current*(temp_nei-temperature) + conv_to<double>::from(logpsi.row(j-p))-conv_to<double>::from(logpsi.row(curr_temp)));
 //Apply balancing function to temperature neighbors /////////////////////////////           
-          if(temporal<0){probs(j) = (exp(temporal)/J);}else{probs(j)=(1/J);}
+          if(temporal<0){probs(j) = temporal - log(J);}else{probs(j)=-log(J);}
           }
         // Rcpp::Rcout << "Finish iteration of loop  "<< j<<std::endl; 
       }
       
       //Choose the next neighbor
       vec u = Rcpp::runif(p+t);
-      vec probs_choose = -log(u)/probs;
+      vec probs_choose = log(-log(u))-probs;
       
       //Find the index of the minimum element. source:https://gallery.rcpp.org/articles/vector-minimum/
       //This corresponds to choosing that neighbor
