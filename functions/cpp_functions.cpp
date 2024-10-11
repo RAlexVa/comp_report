@@ -567,13 +567,13 @@ vec Simulation_mod_IIT(int n, int p, int numsim, int numiter){
           temporal=((logLikelihood(modelX,resY,coord)-logpi_current));
         }
         //Apply balancing function to spatial neighbors /////////////////////////////
-          probs(j)=exp(temporal/2)/p_double;
+          probs(j)=(temporal/2) - log(p_double);
       }
       ////////////      
  
       //Choose the next neighbor
       vec u = Rcpp::runif(p);
-      vec probs_choose = -log(u)/probs;
+      vec probs_choose = log(-log(u)) - probs;
       
       //Find the index of the minimum element. source:https://gallery.rcpp.org/articles/vector-minimum/
       //This corresponds to choosing that neighbor
