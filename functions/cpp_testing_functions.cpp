@@ -196,6 +196,94 @@ int check_modes(const arma::vec& X) {
 
 
 
+// Function to read a matrix from a file providing the file's name
+// [[Rcpp::export]]
+mat read_file_cpp(String filename) {
+  //std::stringstream filename
+  // Rcpp::Rcout << "Entra funcion" <<std::endl;
+  mat modelX;
+  
+  bool status = modelX.load(filename, arma::csv_ascii);
+  // Rcpp::Rcout << "status= "<< status <<std::endl;
+  // Rcpp::Rcout << "X= "<< modelX <<std::endl;
+  if (!status) {
+    String s("Error loading ");
+    s+=filename;
+    Rcpp::stop(s);
+  }
+  return modelX;
+}
+
+// [[Rcpp::export]]
+vec read_Y_cpp(String filename) {
+  //std::stringstream filename
+  // Rcpp::Rcout << "Entra funcion" <<std::endl;
+  vec resY;
+  
+  bool status = resY.load(filename, arma::csv_ascii);
+  // Rcpp::Rcout << "status= "<< status <<std::endl;
+  // Rcpp::Rcout << "X= "<< modelX <<std::endl;
+  if (!status) {
+    String s("Error loading ");
+    s+=filename;
+    Rcpp::stop(s);
+  }
+  return resY;
+}
+
+// [[Rcpp::export]]
+vec read_Y_i(int i) {
+  //std::stringstream filename
+  // Rcpp::Rcout << "Entra funcion" <<std::endl;
+  vec resY;
+  std::string filename = "models/resY" + std::to_string(i) + ".csv";
+  bool status = resY.load(filename, arma::csv_ascii);
+  // Rcpp::Rcout << "status= "<< status <<std::endl;
+  // Rcpp::Rcout << "X= "<< modelX <<std::endl;
+  if (!status) {
+    Rcpp::stop("Error loading file: " + filename);
+  }
+  return resY;
+}
+
+// [[Rcpp::export]]
+double read_file_inside_function(int n){
+  
+  vec X={1,1,0,1};
+  uvec coord = find(X==1);
+  Rcpp::Rcout << coord <<std::endl;
+  mat modelX;
+  vec resY;
+  double ll;
+  bool status;
+    // String filename_model("models/modelX");
+  // String filename_res("models/resY");
+  // String temp("");
+  // String contador;
+  // std::string filename_model="C:/Users/ralex/Documents/src/comp_report/codes/modelX";
+  // std::string filename_res="C:/Users/ralex/Documents/src/comp_report/codes/resY";
+  // std::string temp;
+  for(int i=0;i<n;i++){
+    Rcpp::Rcout << "For loop iter= "<< i <<std::endl;
+    // contador= std::to_string(i+1) + ".csv";
+    // temp= filename_model += contador;
+    // Rcpp::Rcout << temp.get_cstring() <<std::endl;
+    status = modelX.load("models/modelX" + std::to_string(i+1) + ".csv", arma::csv_ascii);
+     Rcpp::Rcout << status <<std::endl;
+    // Rcpp::Rcout << modelX <<std::endl;
+    // temp= filename_res += contador;
+    // Rcpp::Rcout << temp <<std::endl;
+    status = resY.load("models/resY" + std::to_string(i+1) + ".csv", arma::csv_ascii);
+    Rcpp::Rcout << status <<std::endl;
+    ll=logLikelihood(modelX,resY,coord);
+    Rcpp::Rcout << ll <<std::endl;
+  }
+  return ll;
+}
+
+
+
+
 //////////////////////////////////
 //Some useful links
 
