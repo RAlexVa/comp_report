@@ -1,5 +1,6 @@
+#rm(list=ls())
 library(Rcpp)
-
+library(RcppArmadillo)
 Rcpp::sourceCpp("functions/cpp_functions.cpp")
 #Rcpp::sourceCpp("codes/loglikelihood.cpp")
 
@@ -35,8 +36,6 @@ cppFunction("double logLikelihood(uvec pos) {
 
 
 
-
-
 set.seed(234)
 lm_r <- function(n,p){
   res <- random_model(n,p)
@@ -63,8 +62,26 @@ lm_r(100,200)
 set.seed(234)
 lm_cpp(100,200)
 microbenchmark(lm_r(100,200),lm_cpp(100,200))
+#########################################################
+##### Testing functiosn that read model files instead of creating them each time ######
+Rcpp::sourceCpp("functions/cpp_functions.cpp")
+n <- 100
+p <- 200
+set.seed(134)
+temp1.1 <- (1+((1:5)-1))^(-1)
+temp1.2 <- (1+((1:10)-1))^(-1)
+temp2.1 <- (1+((1:5)-1)*2)^(-1)
+temp2.2 <- (1+((1:10)-1)*2)^(-1)
+temp <- temp1.1
+test_1 <- Simulation_mod1(n=n,p=p,startsim=1,endsim=100,numiter=30,temp=temp,t=length(temp))
 
 
+
+######################################################
+#Checking results
+library(data.table)
+res1 <- fread('results/resultados_VT-IIT_modelo1_temp_1_seed_123.csv')
+res2 <- fread('results/resultados_VT-IIT_modelo2_temp_1_seed_123.csv')
 
 ######################################################
 #This was in the cpp_functions file before
@@ -87,15 +104,19 @@ Rcpp::sourceCpp("functions/cpp_functions.cpp")
 n <- 100
 p <- 200
 set.seed(134)
-temp1.1 <- (1+((1:5)-1))
-temp1.2 <- (1+((1:10)-1))
-temp2.1 <- (1+((1:5)-1)*2)
-temp2.2 <- (1+((1:10)-1)*2)
+temp1.1 <- (1+((1:5)-1))^(-1)
+temp1.2 <- (1+((1:10)-1))^(-1)
+temp2.1 <- (1+((1:5)-1)*2)^(-1)
+temp2.2 <- (1+((1:10)-1)*2)^(-1)
 temp <- temp1.1
-test_1 <- Simulation_mod1(n=n,p=p,numsim=1,numiter=1002,temp=temp,t=length(temp))
+test_1 <- Simulation_mod1(n=n,p=p,numsim=2,numiter=1001,temp=temp,t=length(temp))
 
-test_2 <- Simulation_mod1(n=n,p=p,numsim=2,numiter=100,temp=temp,t=length(temp))
-test_3 <- Simulation_mod1(n=n,p=p,numsim=5,numiter=5000,temp=temp,t=length(temp))
+test_2 <- Simulation_mod2(n=n,p=p,numsim=3,numiter=50,temp=temp,t=length(temp))
+
+test_3 <- Simulation_mod3(n=n,p=p,numsim=5,numiter=50,temp=temp,t=length(temp))
+
+test_4 <- Simulation_mod_IIT(n=n,p=p,numsim=5,numiter=50)
+
 
 n <- 100
 p <- 200
@@ -124,10 +145,28 @@ identical(visited[32,],visited[33,]) #Ok since we didn't change temperature
 
 
 
-
-
-
 Rcpp::sourceCpp("functions/cpp_testing_functions.cpp")
+#check how to read files from C++
+# Create many models
+set.seed(345)
+for(i in 1:20){
+  mod <- random_model(n=100,p=200)
+  write.table(mod$X,file=paste0('models/modelX',i,'.csv'),sep=',',row.names = F,col.names=F);
+  write.table(mod$Y,paste0('models/resY',i,'.csv'),sep=',',row.names = F,col.names=F);
+}
+
+mmm <- read_file_cpp('models/modelX1.csv')
+
+selected <- 2
+Y_res <- read_Y_cpp(paste0('models/resY',selected,'.csv'))
+X_model <- read_file_cpp(paste0('models/modelX',selected,'.csv'))
+logLikelihood(X_model,Y_res,c(0,1,3))
+
+Y_res <- read_file_inside_function(5)
+
+
+read_file_inside_function(3)
+
 
 check_ones(c(1,0,0,0,0,1,0,1,1,0,0,1,0,1))
 check_modes(c(1,0,1,0))
@@ -135,13 +174,35 @@ check_modes(c(1,0,1,0))
 check_modes(c(1,0,1,0,0,0,0,1,1,1,1))
 
 check_modes(c(1,1,1,0,0,0,0,0,0,1,1,1,1))
-check_modes(c(1,1,1,0,0,0,0,0,0,0))
-check_modes(c(1,1,0,1,0,0,0,0,0,0))
-check_modes(c(1,0,1,1,0,0,0,0,0,0))
-check_modes(c(0,0,0,0,1,1,1))
-check_modes(c(0,0,0,0,1,1,0,1))
-check_modes(c(0,0,0,0,1,0,1,1))
 
+########### Testing the specific modes ##############
+check_modes(c(1,1,1,rep(0,197)))+1
+check_modes(c(1,1,0,1,rep(0,196)))+1
+check_modes(c(1,0,1,1,rep(0,196)))+1
+check_modes(c(0,0,0,0,1,1,1,rep(0,193)))+1
+check_modes(c(0,0,0,0,1,1,0,1,rep(0,192)))+1
+check_modes(c(0,0,0,0,1,0,1,1,rep(0,192)))+1
+
+
+
+
+
+########### Testing if the functions are working properly reading the file ##############
+
+Rcpp::sourceCpp("functions/cpp_testing_functions.cpp")
+Rcpp::sourceCpp("functions/cpp_functions.cpp")
+llik <- read_file_inside_function(100)
+Simulation_mod1(n=n,p=p,startsim=1,endsim=100,numiter=1,temp=temp,t=length(temp))
+Simulation_mod2(n=n,p=p,startsim=1,endsim=100,numiter=1,temp=temp,t=length(temp))
+Simulation_mod3(n=n,p=p,startsim=1,endsim=100,numiter=1,temp=temp,t=length(temp))
+Simulation_mod_IIT(n=n,p=p,startsim=1,endsim=100,numiter=1)
+
+
+
+
+
+#######################################
+sample_prop(c(4,2,3,4))
 
 
 X <- c(0,1,0,rep(0,12))
