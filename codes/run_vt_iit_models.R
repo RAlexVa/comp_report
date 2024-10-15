@@ -5,8 +5,7 @@ setwd('..')
 Rcpp::sourceCpp("functions/cpp_functions.cpp")
 
 #Define parameters for the model
-seed_def <- as.numeric(readline('define seed'))
-
+seed_def <- 6055
 n <- 100
 p <- 200
 iterations <- 50#50000
