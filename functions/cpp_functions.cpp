@@ -115,7 +115,7 @@ mat Simulation_mod1(int n, int p, int startsim,int endsim, int numiter, vec temp
     vec logpsi(t, fill::zeros); // Initialize vector logpsi, as many entries as temperatures
     //Starts simulation
     for(int i=0;i<numiter;i++){
-      if (i % 1000 == 1) {Rcpp::Rcout << "Simulation: " << s << " Iteration: " << i << std::endl;}
+      if (i % 1000 == 1) {Rcpp::Rcout << "Simulation: " << s+startsim << " Iteration: " << i << std::endl;}
       // Rcpp::Rcout << "Starts iteration  "<< i<<std::endl; 
 
 
@@ -248,7 +248,7 @@ mat Simulation_mod2(int n, int p, int startsim,int endsim, int numiter, vec temp
     vec logpsi(t, fill::zeros); // Initialize vector logpsi, as many entries as temperatures
     //Starts simulation
     for(int i=0;i<numiter;i++){
-      if (i % 1000 == 1) {Rcpp::Rcout << "Simulation: " << s << " Iteration: " << i << std::endl;}
+      if (i % 1000 == 1) {Rcpp::Rcout << "Simulation: " << s+startsim << " Iteration: " << i << std::endl;}
       // Rcpp::Rcout << "Starts iteration  "<< i<<std::endl; 
       
       
@@ -387,7 +387,7 @@ mat Simulation_mod3(int n, int p, int startsim, int endsim, int numiter, vec tem
     vec logpsi(t, fill::zeros); // Initialize vector logpsi, as many entries as temperatures
     //Starts simulation
     for(int i=0;i<numiter;i++){
-      if (i % 1000 == 1) {Rcpp::Rcout << "Simulation: " << s << " Iteration: " << i << std::endl;}
+      if (i % 1000 == 1) {Rcpp::Rcout << "Simulation: " << s+startsim << " Iteration: " << i << std::endl;}
       // Rcpp::Rcout << "Starts iteration  "<< i<<std::endl; 
       
       
@@ -514,7 +514,7 @@ vec Simulation_mod_IIT(int n, int p, int startsim, int endsim, int numiter){
     vec X(p,fill::zeros); // The starting state of all simulations is a vector full of zeroes
     //Starts simulation
     for(int i=0;i<numiter;i++){
-      if (i % 1000 == 1) {Rcpp::Rcout << "Simulation: " << s << " Iteration: " << i << std::endl;}
+      if (i % 1000 == 1) {Rcpp::Rcout << "Simulation: " << s+startsim << " Iteration: " << i << std::endl;}
       int total_neighbors = p; // total number of neighbors is p spacial + t temperature
       vec probs(total_neighbors, fill::zeros); //probabilities
       // Compute likelihood of the current state
