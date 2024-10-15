@@ -247,14 +247,14 @@ vec read_Y_i(int i) {
 }
 
 // [[Rcpp::export]]
-double read_file_inside_function(int n){
+vec read_file_inside_function(int n){
   
   vec X={1,1,0,1};
   uvec coord = find(X==1);
   Rcpp::Rcout << coord <<std::endl;
   mat modelX;
   vec resY;
-  double ll;
+  vec ll(n);
   bool status;
     // String filename_model("models/modelX");
   // String filename_res("models/resY");
@@ -264,24 +264,37 @@ double read_file_inside_function(int n){
   // std::string filename_res="C:/Users/ralex/Documents/src/comp_report/codes/resY";
   // std::string temp;
   for(int i=0;i<n;i++){
-    Rcpp::Rcout << "For loop iter= "<< i <<std::endl;
+    // Rcpp::Rcout << "For loop iter= "<< i <<std::endl;
     // contador= std::to_string(i+1) + ".csv";
     // temp= filename_model += contador;
     // Rcpp::Rcout << temp.get_cstring() <<std::endl;
     status = modelX.load("models/modelX" + std::to_string(i+1) + ".csv", arma::csv_ascii);
-     Rcpp::Rcout << status <<std::endl;
+     // Rcpp::Rcout << status <<std::endl;
     // Rcpp::Rcout << modelX <<std::endl;
     // temp= filename_res += contador;
     // Rcpp::Rcout << temp <<std::endl;
     status = resY.load("models/resY" + std::to_string(i+1) + ".csv", arma::csv_ascii);
-    Rcpp::Rcout << status <<std::endl;
-    ll=logLikelihood(modelX,resY,coord);
-    Rcpp::Rcout << ll <<std::endl;
+    // Rcpp::Rcout << status <<std::endl;
+    ll.row(i)=logLikelihood(modelX,resY,coord);
+    // Rcpp::Rcout << ll <<std::endl;
   }
   return ll;
 }
 
 
+// [[Rcpp::export]]
+int sample_prop(vec probs){
+  //Choose the next neighbor
+  int p=probs.n_rows;
+  vec u = Rcpp::runif(p);
+  vec probs_choose = log(-log(u))-probs;
+  
+  //Find the index of the minimum element. source:https://gallery.rcpp.org/articles/vector-minimum/
+  //This corresponds to choosing that neighbor
+  int neigh_pos = (std::min_element(probs_choose.begin(), probs_choose.end()))-probs_choose.begin();
+  // Rcpp::Rcout << neigh_pos << std::endl;
+  return neigh_pos;
+}
 
 
 //////////////////////////////////
