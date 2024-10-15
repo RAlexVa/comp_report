@@ -8,7 +8,7 @@ Rcpp::sourceCpp("functions/cpp_functions.cpp")
 seed_def <- 6055
 n <- 100
 p <- 200
-iterations <- 50#50000
+iterations <- 50000
 ##### Choose chunk of simulations to run #####
 writeLines('1 is simulations 1-20\n2 is simulations 21-40\n3 is simulations 41-60\n4 is simulations 61-80\n5 is simulations 81-100')
 chunk_selected <- as.numeric(readline('Select chunk of simulations'))
