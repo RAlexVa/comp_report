@@ -2,7 +2,7 @@
 library(Rcpp)
 library(RcppArmadillo)
 setwd('..')
-Rcpp::sourceCpp("functions/cpp_functions.cpp")
+Rcpp::sourceCpp("functions/cpp_functions_create_model.cpp")
 
 #Define parameters for the model
 seed_def <- as.numeric(readline('define seed'))
