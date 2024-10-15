@@ -72,11 +72,12 @@ int check_modes(const arma::vec& X) {
 // This function reports which modes were visited in which iteration and the temperature
 // This is for model 1 which uses min balancing function for all temperatures
 // [[Rcpp::export]]
-mat Simulation_mod1(int n, int p, int numsim, int numiter, vec temp,int t){
-  // Attempt to create a single function that does everything
+mat Simulation_mod1(int n, int p, int startsim,int endsim, int numiter, vec temp,int t){
+  // This function takes the # of the starting and ending simulation so we can run a specific number of simulations
 
   //////////////////////////////////////////////////
-  mat modes_visited(numiter * numsim,2);//Matrix to store the modes visited and temperature
+  int total_sim = (endsim-startsim+1);
+  mat modes_visited(numiter *total_sim ,2);//Matrix to store the modes visited and temperature
   double p_double = double(p);// 
   double t_double = double(t);//
   // Rcpp::Rcout << "t= "<< t <<std::endl;
@@ -84,30 +85,23 @@ mat Simulation_mod1(int n, int p, int numsim, int numiter, vec temp,int t){
   double J=t_double-1;//Number of temperatures minus 1
   // Repeats according to the number of simulations
   /////////////////////////////////////////////////////
-  for(int s=0; s<numsim;s++){
+  // s always has to start from 0 since at the end of the loop we use the varaible s to store values in a matrix
+  for(int s=0; s<total_sim;s++){ //The loop considers the start and ending simulation #s
     //Rcpp::Rcout << "Starts simulation number  "<< s<<std::endl;
 //// Creates model
-    // Create the model matrix X and response Y
-    mat modelX(n,p); // n rows and p columns (p corresponds to the dimension of the problem)
-    vec resY(n);
-    vec beta;
-    // Define beta
-    beta = Rcpp::runif(1);
-    beta = (4+(beta*2))*sqrt(log(p)/n);
-    for(int j=0; j<p;j++){
-      modelX.col(j) = as<vec>(Rcpp::rnorm(n));
-    }
-    // Define response
-    resY= ((modelX.col(0) + modelX.col(1) + modelX.col(2))*beta) + as<vec>(Rcpp::rnorm(n));
-    
-    //Create multi modality
-    modelX.col(3) = modelX.col(1)-modelX.col(2)+as<vec>(Rcpp::rnorm(n));
-    modelX.col(4) = modelX.col(0)+modelX.col(1)+modelX.col(2)+modelX.col(5)+modelX.col(6)+as<vec>(Rcpp::rnorm(n));
-    modelX.col(7) = modelX.col(5)-modelX.col(6)+as<vec>(Rcpp::rnorm(n));
-    // Rcpp::Rcout << "Model defined  "<< modelX<<std::endl; 
-    // Rcpp::Rcout << "Model defined  "<< resY<<std::endl; 
+    // Read the model matrix X and response Y according to the # of simulation
+    mat modelX;
+    vec resY;
+    bool status; //To check if there are any issues with the reading
+    status = modelX.load("models/modelX" + std::to_string(s+startsim) + ".csv", arma::csv_ascii);
+    // Rcpp::Rcout << "Reads file  "<< s+startsim<<std::endl;
+    if (!status) {Rcpp::stop("Error loading file: ModelX for simulation" + std::to_string(s+startsim));}
+    status = resY.load("models/resY" + std::to_string(s+startsim) + ".csv", arma::csv_ascii);
+    if (!status) {Rcpp::stop("Error loading file: ResY for simulation" + std::to_string(s+startsim));}
     // Here we have the model defined for iteration #s
-    
+    // vec Xtest={1,1,0,1};
+    // uvec coord = find(Xtest==1);
+    // Rcpp::Rcout << "Likelihood model  "<< s+startsim<< " is "<< logLikelihood(modelX,resY,coord)<<std::endl;
     ///////////////////////////////////////////////////////////////////////////
     //Then we start the for loop to run over iterations
     vec X(p,fill::zeros); // The starting state of all simulations is a vector full of zeroes
@@ -212,11 +206,12 @@ if(temporal<0){probs(j) = temporal-log(p_double);}else{probs(j) = -log(p_double)
 // This function reports which modes were visited in which iteration and the temperature
 // This is for model 2 which uses min and sq balancing function half and half of temperatures
 // [[Rcpp::export]]
-mat Simulation_mod2(int n, int p, int numsim, int numiter, vec temp,int t){
+mat Simulation_mod2(int n, int p, int startsim,int endsim, int numiter, vec temp,int t){
   // Attempt to create a single function that does everything
   
   //////////////////////////////////////////////////
-  mat modes_visited(numiter * numsim,2);//Matrix to store the modes visited and temperature
+  int total_sim = (endsim-startsim+1);
+  mat modes_visited(numiter * total_sim,2);//Matrix to store the modes visited and temperature
   double p_double = double(p);// 
   double t_double = double(t);//
   // Rcpp::Rcout << "t= "<< t <<std::endl;
@@ -224,30 +219,22 @@ mat Simulation_mod2(int n, int p, int numsim, int numiter, vec temp,int t){
   double J=t_double-1;//Number of temperatures minus 1
   // Repeats according to the number of simulations
   /////////////////////////////////////////////////////
-  for(int s=0; s<numsim;s++){
+  for(int s=0; s<total_sim;s++){
     //Rcpp::Rcout << "Starts simulation number  "<< s<<std::endl;
-    //// Creates model
-    // Create the model matrix X and response Y
-    mat modelX(n,p); // n rows and p columns (p corresponds to the dimension of the problem)
-    vec resY(n);
-    vec beta;
-    // Define beta
-    beta = Rcpp::runif(1);
-    beta = (4+(beta*2))*sqrt(log(p)/n);
-    for(int j=0; j<p;j++){
-      modelX.col(j) = as<vec>(Rcpp::rnorm(n));
-    }
-    // Define response
-    resY= ((modelX.col(0) + modelX.col(1) + modelX.col(2))*beta) + as<vec>(Rcpp::rnorm(n));
-    
-    //Create multi modality
-    modelX.col(3) = modelX.col(1)-modelX.col(2)+as<vec>(Rcpp::rnorm(n));
-    modelX.col(4) = modelX.col(0)+modelX.col(1)+modelX.col(2)+modelX.col(5)+modelX.col(6)+as<vec>(Rcpp::rnorm(n));
-    modelX.col(7) = modelX.col(5)-modelX.col(6)+as<vec>(Rcpp::rnorm(n));
-    // Rcpp::Rcout << "Model defined  "<< modelX<<std::endl; 
-    // Rcpp::Rcout << "Model defined  "<< resY<<std::endl; 
-    // Here we have the model defined for iteration #s
-    
+//// Creates model
+    // Read the model matrix X and response Y according to the # of simulation
+    mat modelX;
+    vec resY;
+    bool status; //To check if there are any issues with the reading
+    status = modelX.load("models/modelX" + std::to_string(s+startsim) + ".csv", arma::csv_ascii);
+    // Rcpp::Rcout << "Reads file  "<< s+startsim<<std::endl;
+    if (!status) {Rcpp::stop("Error loading file: ModelX for simulation" + std::to_string(s+startsim));}
+    status = resY.load("models/resY" + std::to_string(s+startsim) + ".csv", arma::csv_ascii);
+    if (!status) {Rcpp::stop("Error loading file: ResY for simulation" + std::to_string(s+startsim));}
+    // Here we have the model defined for iteration #s   
+    // vec Xtest={1,1,0,1};
+    // uvec coord = find(Xtest==1);
+    // Rcpp::Rcout << "Likelihood model  "<< s+startsim<< " is "<< logLikelihood(modelX,resY,coord)<<std::endl;
     ///////////////////////////////////////////////////////////////////////////
     //Then we start the for loop to run over iterations
     vec X(p,fill::zeros); // The starting state of all simulations is a vector full of zeroes
@@ -357,11 +344,12 @@ if(curr_temp<J/2){//For the first half of temperatures apply the sq balancing fu
 // This function reports which modes were visited in which iteration and the temperature
 // This is for model 3 which uses min only in temperature J and sq balancing function for every other
 // [[Rcpp::export]]
-mat Simulation_mod3(int n, int p, int numsim, int numiter, vec temp,int t){
+mat Simulation_mod3(int n, int p, int startsim, int endsim, int numiter, vec temp,int t){
   // Attempt to create a single function that does everything
   
   //////////////////////////////////////////////////
-  mat modes_visited(numiter * numsim,2);//Matrix to store the modes visited and temperature
+  int total_sim=(endsim-startsim+1);
+  mat modes_visited(numiter * total_sim,2);//Matrix to store the modes visited and temperature
   double p_double = double(p);// 
   double t_double = double(t);//
   // Rcpp::Rcout << "t= "<< t <<std::endl;
@@ -369,29 +357,22 @@ mat Simulation_mod3(int n, int p, int numsim, int numiter, vec temp,int t){
   double J=t_double-1;//Number of temperatures minus 1
   // Repeats according to the number of simulations
   /////////////////////////////////////////////////////
-  for(int s=0; s<numsim;s++){
+  for(int s=0; s<total_sim;s++){
     //Rcpp::Rcout << "Starts simulation number  "<< s<<std::endl;
-    //// Creates model
-    // Create the model matrix X and response Y
-    mat modelX(n,p); // n rows and p columns (p corresponds to the dimension of the problem)
-    vec resY(n);
-    vec beta;
-    // Define beta
-    beta = Rcpp::runif(1);
-    beta = (4+(beta*2))*sqrt(log(p)/n);
-    for(int j=0; j<p;j++){
-      modelX.col(j) = as<vec>(Rcpp::rnorm(n));
-    }
-    // Define response
-    resY= ((modelX.col(0) + modelX.col(1) + modelX.col(2))*beta) + as<vec>(Rcpp::rnorm(n));
-    
-    //Create multi modality
-    modelX.col(3) = modelX.col(1)-modelX.col(2)+as<vec>(Rcpp::rnorm(n));
-    modelX.col(4) = modelX.col(0)+modelX.col(1)+modelX.col(2)+modelX.col(5)+modelX.col(6)+as<vec>(Rcpp::rnorm(n));
-    modelX.col(7) = modelX.col(5)-modelX.col(6)+as<vec>(Rcpp::rnorm(n));
-    // Rcpp::Rcout << "Model defined  "<< modelX<<std::endl; 
-    // Rcpp::Rcout << "Model defined  "<< resY<<std::endl; 
-    // Here we have the model defined for iteration #s
+  //// Creates model
+    // Read the model matrix X and response Y according to the # of simulation
+    mat modelX;
+    vec resY;
+    bool status; //To check if there are any issues with the reading
+    status = modelX.load("models/modelX" + std::to_string(s+startsim) + ".csv", arma::csv_ascii);
+    // Rcpp::Rcout << "Reads file  "<< s+startsim<<std::endl;
+    if (!status) {Rcpp::stop("Error loading file: ModelX for simulation" + std::to_string(s+startsim));}
+    status = resY.load("models/resY" + std::to_string(s+startsim) + ".csv", arma::csv_ascii);
+    if (!status) {Rcpp::stop("Error loading file: ResY for simulation" + std::to_string(s+startsim));}
+    // Here we have the model defined for iteration #s   
+    // vec Xtest={1,1,0,1};
+    // uvec coord = find(Xtest==1);
+    // Rcpp::Rcout << "Likelihood model  "<< s+startsim<< " is "<< logLikelihood(modelX,resY,coord)<<std::endl;
     
     ///////////////////////////////////////////////////////////////////////////
     //Then we start the for loop to run over iterations
@@ -502,37 +483,31 @@ mat Simulation_mod3(int n, int p, int numsim, int numiter, vec temp,int t){
 // This function reports which modes were visited in which iteration and the temperature
 // This is for model 3 which uses min only in temperature J and sq balancing function for every other
 // [[Rcpp::export]]
-vec Simulation_mod_IIT(int n, int p, int numsim, int numiter){
+vec Simulation_mod_IIT(int n, int p, int startsim, int endsim, int numiter){
   // Attempt to create a single function that does everything
   
   //////////////////////////////////////////////////
-  vec modes_visited(numiter * numsim);//Matrix to store the modes visited and temperature
+  int total_sim = (endsim-startsim+1);
+  vec modes_visited(numiter * total_sim);//Matrix to store the modes visited and temperature
   double p_double = double(p);// 
   // Repeats according to the number of simulations
   /////////////////////////////////////////////////////
-  for(int s=0; s<numsim;s++){
+  for(int s=0; s<total_sim;s++){
     //Rcpp::Rcout << "Starts simulation number  "<< s<<std::endl;
-    //// Creates model
-    // Create the model matrix X and response Y
-    mat modelX(n,p); // n rows and p columns (p corresponds to the dimension of the problem)
-    vec resY(n);
-    vec beta;
-    // Define beta
-    beta = Rcpp::runif(1);
-    beta = (4+(beta*2))*sqrt(log(p)/n);
-    for(int j=0; j<p;j++){
-      modelX.col(j) = as<vec>(Rcpp::rnorm(n));
-    }
-    // Define response
-    resY= ((modelX.col(0) + modelX.col(1) + modelX.col(2))*beta) + as<vec>(Rcpp::rnorm(n));
-    
-    //Create multi modality
-    modelX.col(3) = modelX.col(1)-modelX.col(2)+as<vec>(Rcpp::rnorm(n));
-    modelX.col(4) = modelX.col(0)+modelX.col(1)+modelX.col(2)+modelX.col(5)+modelX.col(6)+as<vec>(Rcpp::rnorm(n));
-    modelX.col(7) = modelX.col(5)-modelX.col(6)+as<vec>(Rcpp::rnorm(n));
-    // Rcpp::Rcout << "Model defined  "<< modelX<<std::endl; 
-    // Rcpp::Rcout << "Model defined  "<< resY<<std::endl; 
-    // Here we have the model defined for iteration #s
+  //// Creates model
+    // Read the model matrix X and response Y according to the # of simulation
+    mat modelX;
+    vec resY;
+    bool status; //To check if there are any issues with the reading
+    status = modelX.load("models/modelX" + std::to_string(s+startsim) + ".csv", arma::csv_ascii);
+    // Rcpp::Rcout << "Reads file  "<< s+startsim<<std::endl;
+    if (!status) {Rcpp::stop("Error loading file: ModelX for simulation" + std::to_string(s+startsim));}
+    status = resY.load("models/resY" + std::to_string(s+startsim) + ".csv", arma::csv_ascii);
+    if (!status) {Rcpp::stop("Error loading file: ResY for simulation" + std::to_string(s+startsim));}
+    // Here we have the model defined for iteration #s   
+    // vec Xtest={1,1,0,1};
+    // uvec coord = find(Xtest==1);
+    // Rcpp::Rcout << "Likelihood model  "<< s+startsim<< " is "<< logLikelihood(modelX,resY,coord)<<std::endl;
     
     ///////////////////////////////////////////////////////////////////////////
     //Then we start the for loop to run over iterations
