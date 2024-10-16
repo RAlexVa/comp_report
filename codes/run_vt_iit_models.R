@@ -35,9 +35,9 @@ if(t_selected==1){
 }else if(t_selected==2){
   temp <- temp1.2
 }else if(t_selected==3){
-  temp <- temp1.3
+  temp <- temp2.1
 }else if(t_selected==4){
-  temp <- temp1.4
+  temp <- temp2.2
 }else{print('Incorrect model selected')}
 
 ##### Choose method #####
