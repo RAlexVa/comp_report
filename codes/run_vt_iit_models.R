@@ -55,4 +55,4 @@ if(m_selected==0){
 }else{print('Incorrect model selected')}
 
 
-write.table(results,paste0('results/','resultados_VT-IIT_modelo',m_selected,'_temp_',t_selected,'_seed_',seed_def,'+',chunk_selected,'sim',start_point,'_',end_point,'.csv'),row.names=F, col.names=F)
+write.table(results,paste0('results/','resultados_VT-IIT_modelo',m_selected,'_temp_',t_selected,'_seed_',seed_def,'+',chunk_selected,'sim',start_point,'_',end_point,'.csv'),row.names=F, col.names=F, sep=',')
