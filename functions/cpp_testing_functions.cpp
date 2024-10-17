@@ -48,7 +48,7 @@ List gen_normals(int n){
   return ret;
 }
 // [[Rcpp::export]]
-double logLikelihood(mat X, colvec Y, uvec pos){
+double logLikelihood_m(mat X, colvec Y, uvec pos){
   mat subX = X.cols(pos);
   
   //Manual implementation of linear regression
@@ -63,6 +63,24 @@ double logLikelihood(mat X, colvec Y, uvec pos){
   //Adding a penalization for the number of terms considering a normal prior for the betas
   logl=logl - 0.5 *arma::dot(coef,coef) - log(2*M_PI)*subX.n_cols/2;
   Rcpp::Rcout << coef << std::endl;
+  return logl;
+}
+
+// [[Rcpp::export]]
+double logLikelihood(mat X, colvec Y, uvec pos){
+  mat subX = X.cols(pos);
+  
+  //Manual implementation of linear regression
+  //source: https://cran.r-project.org/web/packages/RcppArmadillo/readme/README.html
+  int n = X.n_rows;//, k = X.n_cols
+  
+  arma::colvec coef = arma::solve(subX, Y);     // fit model y ~ X
+  arma::colvec res  = Y - subX*coef;            // residuals
+  double rss = arma::dot(res, res);  // 
+  
+  double logl = -0.5*(n*log(2*M_PI) + n*log(rss) -n*log(n) + n);
+  //Adding a penalization for the number of terms considering a normal prior for the betas
+  logl=logl - 0.5 *arma::dot(coef,coef) - log(2*M_PI)*subX.n_cols/2;
   return logl;
 }
 //Return the loglikelihood when there are no covariates selected
