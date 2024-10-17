@@ -187,17 +187,36 @@ check_modes(c(0,0,0,0,1,1,0,1,rep(0,192)))+1
 check_modes(c(0,0,0,0,1,0,1,1,rep(0,192)))+1
 
 check_modes(c(1,1,1,1,rep(0,196)))+1
+########### Checking multimodality ##############
+mod1 <- c(1,1,1, rep(0,197))
+mod2 <- c(1,1,0,1, rep(0,196))
+mod3 <- c(1,0,1,1, rep(0,196))
+mod4 <- c(0,0,0,0,1,1,1,rep(0,193))
+mod5 <- c(0,0,0,0,1,1,0,1,rep(0,192))
+mod6 <- c(0,0,0,0,1,0,1,1,rep(0,192))
 
 selected <- 100
 Y_res <- read_Y_cpp(paste0('models/resY',selected,'.csv'))
 X_model <- read_file_cpp(paste0('models/modelX',selected,'.csv'))
-logLikelihood(X_model, Y_res,which(c(1,1,1)==1)-1)
-logLikelihood(X_model, Y_res,which(c(1,1,0,1)==1)-1)
-logLikelihood(X_model, Y_res,which(c(1,0,1,1)==1)-1)
-logLikelihood(X_model, Y_res,which(c(0,0,0,0,1,1,1)==1)-1)
-logLikelihood(X_model, Y_res,which(c(0,0,0,0,1,1,0,1)==1)-1)
-logLikelihood(X_model, Y_res,which(c(0,0,0,0,1,0,1,1)==1)-1)
 
+logLikelihood_m(X_model, Y_res,which(mod1==1)-1)
+logLikelihood_m(X_model, Y_res,which(mod2==1)-1)
+logLikelihood_m(X_model, Y_res,which(mod3==1)-1)
+logLikelihood_m(X_model, Y_res,which(mod4==1)-1)
+logLikelihood_m(X_model, Y_res,which(mod5==1)-1)
+logLikelihood_m(X_model, Y_res,which(mod6==1)-1)
+
+a <- logLikelihood_m(X_model, Y_res,which(mod1==1)-1)
+logLikelihood_m(X_model, Y_res,c(which(mod1==1))-1)
+logLikelihood_m(X_model, Y_res,c(1,2,3,10)-1)
+# c(1.2926,1.2922,1.2964)%*%c(1.2926,1.2922,1.2964)
+c(1.2928,1.2919,1.2967,.0076)%*%c(1.2928,1.2919,1.2967,.0076)
+compare <- c()
+for(i in 1:length(mod1)){
+  newstate <- mod1
+  newstate[i] <- 1-newstate[i]
+  compare[i] <- logLikelihood(X_model, Y_res,which(newstate==1)-1)>a
+}
 #Checking this likelihood
 mod5 <- c(0,0,0,0,1,1,0,1,rep(0,192))
 logLikelihood(X_model, Y_res,which(mod5==1)-1)
@@ -227,8 +246,11 @@ logLik(mod)
 logLikelihood(X_model,Y_res,variables-1) #Shift the indexes
 
 ###################### Checking if the normals are properly created ##################
-
-
+normals <- gen_normals(1000)
+hist(normals$n1) #Small variance
+hist(normals$n2) #Large variance
+hist(normals$n3) #Mean=5
+hist(normals$n4) #standard normal
 
 
 
