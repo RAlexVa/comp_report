@@ -61,7 +61,9 @@ double logLikelihood_m(mat X, colvec Y, uvec pos){
   
   double logl = -0.5*(n*log(2*M_PI) + n*log(rss) -n*log(n) + n);
   //Adding a penalization for the number of terms considering a normal prior for the betas
-  logl=logl - 0.5 *arma::dot(coef,coef) - log(2*M_PI)*subX.n_cols/2;
+  // logl=logl - 0.5 *arma::dot(coef,coef) - log(2*M_PI)*subX.n_cols/2;
+  //add a penalization for small coefficients
+  logl=logl - 0.5 *arma::dot(coef,coef) - 3*log(n)*(subX.n_cols+1) + sum(log(abs(coef)));
   Rcpp::Rcout << coef << std::endl;
   return logl;
 }
@@ -80,7 +82,9 @@ double logLikelihood(mat X, colvec Y, uvec pos){
   
   double logl = -0.5*(n*log(2*M_PI) + n*log(rss) -n*log(n) + n);
   //Adding a penalization for the number of terms considering a normal prior for the betas
-  logl=logl - 0.5 *arma::dot(coef,coef) - log(2*M_PI)*subX.n_cols/2;
+  // logl=logl - 0.5 *arma::dot(coef,coef) - log(2*M_PI)*subX.n_cols/2;
+  //add a penalization for small coefficients
+  logl=logl - 0.5 *arma::dot(coef,coef) - 3*log(n)*(subX.n_cols+1) + sum(log(abs(coef)));
   return logl;
 }
 //Return the loglikelihood when there are no covariates selected
