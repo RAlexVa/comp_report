@@ -7,12 +7,14 @@ Rcpp::sourceCpp("functions/cpp_func_random_model.cpp")
 
 set.seed(1110)
 numsim <- 100
+betas <- numeric(numsim)
 for(i in 1:numsim){
   mod <- random_model(n=100,p=200)
   write.table(mod$X,file=paste0('models/modelX',i,'.csv'),sep=',',row.names = F,col.names=F);
   write.table(mod$Y,paste0('models/resY',i,'.csv'),sep=',',row.names = F,col.names=F);
+  betas[i] <- mod$beta
 }
-
+write.table(betas,file=paste0('models/betas.csv'),sep=',',row.names = F,col.names=F);
 #We create this set of matrices and response vectors to use the exact same model when
 #testing different algorithms perfmance
 
