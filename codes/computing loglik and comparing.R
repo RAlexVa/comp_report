@@ -176,12 +176,59 @@ check_modes(c(1,0,1,0,0,0,0,1,1,1,1))
 check_modes(c(1,1,1,0,0,0,0,0,0,1,1,1,1))
 
 ########### Testing the specific modes ##############
+#rm(list=ls())
+Rcpp::sourceCpp("functions/cpp_testing_functions.cpp")
+#Rcpp::sourceCpp("functions/cpp_functions.cpp")
 check_modes(c(1,1,1,rep(0,197)))+1
 check_modes(c(1,1,0,1,rep(0,196)))+1
 check_modes(c(1,0,1,1,rep(0,196)))+1
 check_modes(c(0,0,0,0,1,1,1,rep(0,193)))+1
 check_modes(c(0,0,0,0,1,1,0,1,rep(0,192)))+1
 check_modes(c(0,0,0,0,1,0,1,1,rep(0,192)))+1
+
+check_modes(c(1,1,1,1,rep(0,196)))+1
+
+selected <- 100
+Y_res <- read_Y_cpp(paste0('models/resY',selected,'.csv'))
+X_model <- read_file_cpp(paste0('models/modelX',selected,'.csv'))
+logLikelihood(X_model, Y_res,which(c(1,1,1)==1)-1)
+logLikelihood(X_model, Y_res,which(c(1,1,0,1)==1)-1)
+logLikelihood(X_model, Y_res,which(c(1,0,1,1)==1)-1)
+logLikelihood(X_model, Y_res,which(c(0,0,0,0,1,1,1)==1)-1)
+logLikelihood(X_model, Y_res,which(c(0,0,0,0,1,1,0,1)==1)-1)
+logLikelihood(X_model, Y_res,which(c(0,0,0,0,1,0,1,1)==1)-1)
+
+#Checking this likelihood
+mod5 <- c(0,0,0,0,1,1,0,1,rep(0,192))
+logLikelihood(X_model, Y_res,which(mod5==1)-1)
+mod5_comp <- c(0,0,0,0,1,1,0,1,rep(0,152),1,rep(0,39))
+logLikelihood(X_model, Y_res,which(mod5_comp==1)-1)
+compare <- c()
+for(i in 1:length(mod5)){
+  newstate <- mod5
+  newstate[i] <- 1-newstate[i]
+  compare[i] <- logLikelihood(X_model, Y_res,which(newstate==1)-1)
+}
+
+logLikelihood(X_model, Y_res,which(c(1,1,1,1,1,1,1,1,1,1,1,1,1)==1)-1)
+
+logLikelihood(X_model, Y_res,which(c(1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1)==1)-1)
+
+logLikelihood(X_model, Y_res,which(c(1,1,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,1,1,1,1,1,1)==1)-1)
+#Computing likelihood in R
+variables <- c(1:3,9:20)
+variables <- c(1:3)
+variables <- which(c(1,1,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,1,1,1,1,1,1)==1)
+data <- as.data.frame(cbind(Y_res,X_model))
+data_s <- data[,c(1,variables+1)] #Include column 1 since it's Y, shift indexes to consider column Y
+mod <- lm(V1 ~.-1, data=data_s)
+logLik(mod)
+#Computing likelihood using Rcpp functions
+logLikelihood(X_model,Y_res,variables-1) #Shift the indexes
+
+###################### Checking if the normals are properly created ##################
+
+
 
 
 
