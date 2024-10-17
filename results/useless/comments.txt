@@ -1,0 +1,4 @@
+Se obtuvieron estos resultados con errores
+
+1. los modelos (X,Y) estaban mal definidos ya que no controlamos la varianza del ruido
+2. No se checo bien la definicion de log posterior ya que no es necesariamente solo log likelihood
