@@ -54,5 +54,7 @@ if(m_selected==0){
   results <- Simulation_mod3(n=n,p=p,startsim=start_point,endsim=end_point,numiter=iterations,temp=temp,t=length(temp))
 }else{print('Incorrect model selected')}
 
+if(m_selected==0){
+  write.table(results,paste0('results/','resultados_VT-IIT_modelo',m_selected,'_seed_',seed_def,'+',chunk_selected,'sim',start_point,'_',end_point,'.csv'),row.names=F, col.names=F, sep=',')
+}else{write.table(results,paste0('results/','resultados_VT-IIT_modelo',m_selected,'_temp_',t_selected,'_seed_',seed_def,'+',chunk_selected,'sim',start_point,'_',end_point,'.csv'),row.names=F, col.names=F, sep=',')}
 
-write.table(results,paste0('results/','resultados_VT-IIT_modelo',m_selected,'_temp_',t_selected,'_seed_',seed_def,'+',chunk_selected,'sim',start_point,'_',end_point,'.csv'),row.names=F, col.names=F, sep=',')
