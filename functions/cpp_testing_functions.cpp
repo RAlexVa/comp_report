@@ -20,13 +20,13 @@ List random_model(int n, int p) {
     ranmat.col(j) = as<vec>(Rcpp::rnorm(n));
   }
   // Define response
-  Y= ((ranmat.col(0) + ranmat.col(1) + ranmat.col(2))*beta) + as<vec>(Rcpp::rnorm(n));
+  Y= ((ranmat.col(0) + ranmat.col(1) + ranmat.col(2))*beta) + as<vec>(Rcpp::rnorm(n,0.0,0.5));
   
   //Create multimodality
   
-  ranmat.col(3) = ranmat.col(1)-ranmat.col(2)+as<vec>(Rcpp::rnorm(n));
-  ranmat.col(4) = ranmat.col(0)+ranmat.col(1)+ranmat.col(2)+ranmat.col(5)+ranmat.col(6)+as<vec>(Rcpp::rnorm(n));
-  ranmat.col(7) = ranmat.col(5)-ranmat.col(6)+as<vec>(Rcpp::rnorm(n));
+  ranmat.col(3) = ranmat.col(1)-ranmat.col(2)+as<vec>(Rcpp::rnorm(n,0.0,0.1));
+  ranmat.col(4) = ranmat.col(0)+ranmat.col(1)+ranmat.col(2)+ranmat.col(5)+ranmat.col(6)+as<vec>(Rcpp::rnorm(n,0.0,0.1));
+  ranmat.col(7) = ranmat.col(5)-ranmat.col(6)+as<vec>(Rcpp::rnorm(n,0.0,0.1));
   
   List ret;
   ret["Y"]=Y;
@@ -34,6 +34,20 @@ List random_model(int n, int p) {
   return ret;
 }
 
+// [[Rcpp::export]]
+List gen_normals(int n){
+  vec n1= as<vec>(Rcpp::rnorm(n,0.0,0.5));
+  vec n2= as<vec>(Rcpp::rnorm(n,0.0,2.5));
+  vec n3= as<vec>(Rcpp::rnorm(n,5,0.5));
+  vec n4= as<vec>(Rcpp::rnorm(n));
+  List ret;
+  ret["n1"]=n1;
+  ret["n2"]=n2;
+  ret["n3"]=n3;
+  ret["n4"]=n4;
+  return ret;
+}
+// [[Rcpp::export]]
 double logLikelihood(mat X, colvec Y, uvec pos){
   mat subX = X.cols(pos);
   
@@ -46,6 +60,9 @@ double logLikelihood(mat X, colvec Y, uvec pos){
   double rss = arma::dot(res, res);  // 
   
   double logl = -0.5*(n*log(2*M_PI) + n*log(rss) -n*log(n) + n);
+  //Adding a penalization for the number of terms considering a normal prior for the betas
+  logl=logl - 0.5 *arma::dot(coef,coef) - log(2*M_PI)*subX.n_cols/2;
+  Rcpp::Rcout << coef << std::endl;
   return logl;
 }
 //Return the loglikelihood when there are no covariates selected
