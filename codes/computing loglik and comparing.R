@@ -110,7 +110,8 @@ temp2.1 <- (1+((1:5)-1)*2)^(-1)
 temp2.2 <- (1+((1:10)-1)*2)^(-1)
 temp <- temp2.1
 
-test_1 <- Simulation_mod3(n,p,1, 1,10000, temp,length(temp))
+test_1 <- Simulation_mod3(n,p,1, 10,100, temp,length(temp))
+test_2 <- Simulation_mod_IIT(n,p,1, 10,100)
 
 test_1 <- Simulation_mod1(n=n,p=p,numsim=2,numiter=1001,temp=temp,t=length(temp))
 
