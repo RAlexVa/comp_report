@@ -11,10 +11,9 @@ List random_model(int n, int p) {
   vec Y(n);
   vec beta;
   // Define beta
-  beta = Rcpp::runif(1);
-  beta = (4+(beta*2))*sqrt(log(p)/n);
+  beta = (4+(Rcpp::runif(1)*2))*sqrt(log(p)/n);
   for(int j=0; j<p;j++){
-    ranmat.col(j) = as<vec>(Rcpp::rnorm(n,0.0,1.0));//mean 0, standard deviation 1
+    ranmat.col(j) = as<vec>(Rcpp::rnorm(n));//mean 0, standard deviation 1
   }
   // Define response
   Y= ((ranmat.col(0) + ranmat.col(1) + ranmat.col(2))*beta) + as<vec>(Rcpp::rnorm(n,0.0,0.5));
@@ -28,5 +27,6 @@ List random_model(int n, int p) {
   List ret;
   ret["Y"]=Y;
   ret["X"]=ranmat;
+  ret["beta"]=beta;
   return ret;
 }
