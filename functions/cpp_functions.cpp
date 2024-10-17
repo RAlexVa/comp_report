@@ -22,7 +22,6 @@ double logl = -0.5*(n*log(2*M_PI) + n*log(rss) -n*log(n) + n);
 //Adding a penalization for the number of terms considering a normal prior for the betas
 //add a penalization for small coefficients and number of parameters
 logl=logl - 0.5 *arma::dot(coef,coef) - 3*log(n)*(subX.n_cols+1) + sum(log(abs(coef)));
-Rcpp::Rcout << coef << std::endl;
 
 return logl;
 }
