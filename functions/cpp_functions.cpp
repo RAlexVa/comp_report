@@ -73,6 +73,7 @@ int check_modes(const arma::vec& X) {
   }
   return -1; // Return false if X does not match any model
 }
+
 // This function reports which modes were visited in which iteration and the temperature
 // This is for model 1 which uses min balancing function for all temperatures
 // [[Rcpp::export]]
@@ -570,3 +571,57 @@ vec Simulation_mod_IIT(int n, int p, int startsim, int endsim, int numiter){
   }//End of for loop for simulations
   return modes_visited;
 }//End of function
+
+// [[Rcpp::export]]
+mat readmodelX(int sim){
+  mat modelX;
+  bool status; //To check if there are any issues with the reading
+  status = modelX.load("models/modelX" + std::to_string(sim) + ".csv", arma::csv_ascii);
+  // Rcpp::Rcout << "Reads file  "<< s+startsim<<std::endl;
+  if (!status) {Rcpp::stop("Error loading file: ModelX for simulation" + std::to_string(sim));}
+  return modelX;
+}
+
+// [[Rcpp::export]]
+vec readY(int sim){
+  vec resY;
+  bool status; //To check if there are any issues with the reading
+  status = resY.load("models/resY" + std::to_string(sim) + ".csv", arma::csv_ascii);
+  if (!status) {Rcpp::stop("Error loading file: ResY for simulation" + std::to_string(sim));}
+  return resY;
+}
+
+// [[Rcpp::export]]
+double bf_sq(double x){
+  return x/2;
+}
+
+// [[Rcpp::export]]
+double bf_min(double x){
+  double result;
+  if(x<0){
+    result = x;
+  }else{
+    result = 0;
+  }
+  return result;
+}
+
+//This function we don't export to R because it generates errors
+double invoke(double x, double (*func)(double)) {
+  return func(x);
+}
+
+// [[Rcpp::export]]
+double bal_func(double x,String chosen){
+  if (chosen == "sq") {
+    return invoke(x, &bf_sq);
+  } else if (chosen == "min") {
+    return invoke(x, &bf_min);
+  } else {
+    cout << "Unknown operation!" << endl;
+    Rcpp::Rcout <<"Unknown operation!" << std::endl;
+    return 0; // Default return for unknown operation
+  }
+}
+
