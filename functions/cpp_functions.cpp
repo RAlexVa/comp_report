@@ -133,7 +133,7 @@ mat Simulation_mod1(int n, int p, int startsim,int endsim, int numiter, vec temp
       // Compute likelihood of the current state
       double logpi_current=0;
       uvec current_coord = find(X==1);
-      if(sum(current_coord)==0){ // If the current state is all zeros
+      if(current_coord.empty()){ // If the current state is all zeros
         logpi_current=logL_0(resY);
       }else{ // If the current state is not all zeroes
         logpi_current = logLikelihood(modelX,resY,current_coord);
@@ -149,7 +149,7 @@ mat Simulation_mod1(int n, int p, int startsim,int endsim, int numiter, vec temp
         //Rcpp::Rcout << newX << std::endl;
         uvec coord = find(newX==1);
         //Rcpp::Rcout << coord << std::endl;
-        if(sum(coord)==0){// In case the state visited is all 0s
+        if(coord.empty()){// In case the state visited is all 0s
           temporal=(logL_0(resY)-logpi_current)*temperature;
         }else{// For every other state that is not all 0s
           temporal=((logLikelihood(modelX,resY,coord)-logpi_current)*temperature);
@@ -266,7 +266,7 @@ mat Simulation_mod2(int n, int p, int startsim,int endsim, int numiter, vec temp
       // Compute likelihood of the current state
       double logpi_current=0;
       uvec current_coord = find(X==1);
-      if(sum(current_coord)==0){ // If the current state is all zeros
+      if(current_coord.empty()){ // If the current state is all zeros
         logpi_current=logL_0(resY);
       }else{ // If the current state is not all zeroes
         logpi_current = logLikelihood(modelX,resY,current_coord);
@@ -282,7 +282,7 @@ mat Simulation_mod2(int n, int p, int startsim,int endsim, int numiter, vec temp
         //Rcpp::Rcout << newX << std::endl;
         uvec coord = find(newX==1);
         //Rcpp::Rcout << coord << std::endl;
-        if(sum(coord)==0){// In case the state visited is all 0s
+        if(coord.empty()){// In case the state visited is all 0s
           temporal=(logL_0(resY)-logpi_current)*temperature;
         }else{// For every other state that is not all 0s
           temporal=((logLikelihood(modelX,resY,coord)-logpi_current)*temperature);
@@ -405,7 +405,7 @@ mat Simulation_mod3(int n, int p, int startsim, int endsim, int numiter, vec tem
       // Compute likelihood of the current state
       double logpi_current=0;
       uvec current_coord = find(X==1);
-      if(sum(current_coord)==0){ // If the current state is all zeros
+      if(current_coord.empty()){ // If the current state is all zeros
         logpi_current=logL_0(resY);
       }else{ // If the current state is not all zeroes
         logpi_current = logLikelihood(modelX,resY,current_coord);
@@ -421,7 +421,7 @@ mat Simulation_mod3(int n, int p, int startsim, int endsim, int numiter, vec tem
         //Rcpp::Rcout << newX << std::endl;
         uvec coord = find(newX==1);
         //Rcpp::Rcout << coord << std::endl;
-        if(sum(coord)==0){// In case the state visited is all 0s
+        if(coord.empty()){// In case the state visited is all 0s
           temporal=(logL_0(resY)-logpi_current)*temperature;
         }else{// For every other state that is not all 0s
           temporal=((logLikelihood(modelX,resY,coord)-logpi_current)*temperature);
@@ -525,7 +525,7 @@ vec Simulation_mod_IIT(int n, int p, int startsim, int endsim, int numiter){
       // Compute likelihood of the current state
       double logpi_current=0;
       uvec current_coord = find(X==1);
-      if(sum(current_coord)==0){ // If the current state is all zeros
+      if(current_coord.empty()){ // If the current state is all zeros
         logpi_current=logL_0(resY);
       }else{ // If the current state is not all zeroes
         logpi_current = logLikelihood(modelX,resY,current_coord);
@@ -541,7 +541,7 @@ vec Simulation_mod_IIT(int n, int p, int startsim, int endsim, int numiter){
         //Rcpp::Rcout << newX << std::endl;
         uvec coord = find(newX==1);
         //Rcpp::Rcout << coord << std::endl;
-        if(sum(coord)==0){// In case the state visited is all 0s
+        if(coord.empty()){// In case the state visited is all 0s
           temporal=(logL_0(resY)-logpi_current);
         }else{// For every other state that is not all 0s
           temporal=((logLikelihood(modelX,resY,coord)-logpi_current));
