@@ -625,3 +625,71 @@ double bal_func(double x,String chosen){
   }
 }
 
+////////////////////////////////////////////////////
+
+// [[Rcpp::export]]
+vec RF_update(vec X, String chosen_bf, mat modelX, vec resY){
+  int total_neighbors = X.n_rows; // total number of neighbors is p spacial
+  vec probs(total_neighbors, fill::zeros); //probabilities
+  // Compute likelihood of the current state
+  double logpi_current=0;
+  uvec current_coord = find(X==1);
+  if(current_coord.empty()){ // If the current state is all zeros
+    logpi_current=logL_0(resY);
+  }else{ // If the current state is not all zeroes
+    logpi_current = logLikelihood(modelX,resY,current_coord);
+  }
+  Rcpp::Rcout << "current loglik: "<< logpi_current << std::endl;
+  ////////////      
+  //Compute weight for all neighbors
+  double temporal=0;
+  vec newX;
+  for(int j=0; j<total_neighbors;j++){
+    // Rcpp::Rcout << "Starts checking neighbors  "<< j<<std::endl; 
+    newX = X;
+    newX.row(j) = 1-X.row(j);
+    //Rcpp::Rcout << newX << std::endl;
+    uvec coord = find(newX==1);
+    //Rcpp::Rcout << coord << std::endl;
+    if(coord.empty()){// In case the state visited is all 0s
+      temporal=logL_0(resY)-logpi_current;
+    }else{// For every other state that is not all 0s
+      temporal=logLikelihood(modelX,resY,coord)-logpi_current;
+    }
+    // Rcpp::Rcout << "loglik antes de bf: "<< temporal <<" en neighbor "<<j+1<< std::endl;
+    //Apply balancing function to log probabilities /////////////////////////////
+    probs(j)=bal_func(temporal, chosen_bf);
+  }
+  ////////////      
+  
+  //Choose the next neighbor
+  vec u = Rcpp::runif(total_neighbors);
+  vec probs_choose = log(-log(u)) - probs;
+  
+  //Find the index of the minimum element. 
+  //This corresponds to choosing that neighbor
+  int neigh_pos = (std::min_element(probs_choose.begin(), probs_choose.end()))-probs_choose.begin();
+  // Rcpp::Rcout <<"probs vector: "<< probs << std::endl;
+  // Rcpp::Rcout <<"chosen neighbor: "<< neigh_pos << std::endl;
+  
+  X.row(neigh_pos) = 1-X.row(neigh_pos); //modify the coordinate of the chosen neighbor
+  return X;
+}
+
+
+// [[Rcpp::export]]
+vec RF_IIT_sim(int numsim, int numiter,int p){
+  vec X(p,fill::zeros); // The starting state of all simulations is a vector full of zeroes
+  
+  for(int s=0;s<numsim;s++){
+    mat modelX=readmodelX(s+1);
+    vec resY=readY(s+1);
+    for(int i=0;i<numiter;i++){
+      X = RF_update(X,"sq",modelX,resY);
+    }
+    Rcpp::Rcout <<"Final state "<< X << std::endl;
+  }
+  return X;
+}
+
+
