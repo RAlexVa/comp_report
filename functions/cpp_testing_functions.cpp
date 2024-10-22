@@ -34,6 +34,22 @@ List random_model(int n, int p) {
   return ret;
 }
 
+
+//To check when all the coords in the vector are 0
+// [[Rcpp::export]]
+int test_coord(vec X){
+  uvec coord = find(X==1);
+  //Rcpp::Rcout << coord << std::endl;
+  if(coord.empty()){// In case the state visited is all 0s
+    Rcpp::Rcout <<"None are 1: "<< std::endl;
+    return 0;
+  }else{// For every other state that is not all 0s
+    Rcpp::Rcout <<"Some are 1: "<<coord<< std::endl;
+    return 1;
+  }
+}
+
+
 // [[Rcpp::export]]
 List gen_normals(int n){
   vec n1= as<vec>(Rcpp::rnorm(n,0.0,0.5));
