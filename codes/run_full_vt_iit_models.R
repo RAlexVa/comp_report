@@ -8,7 +8,10 @@ Rcpp::sourceCpp("functions/cpp_functions.cpp")
 seed_def <- 6055
 n <- 100
 p <- 200
-iterations <- 50000
+
+writeLines('1 is 50k iterations\n 2 is 100k iterations')
+nit <- as.numeric(readline('Select number of iterations'))
+iterations <- 50000*nit
 
 ##### Choose the temperature ladder to use #####
 temp1.1 <- (1+((1:5)-1))^(-1) #J=4, Delta=1
@@ -51,8 +54,8 @@ if(m_selected==0){
 }else{print('Incorrect model selected')}
   
   if(m_selected==0){
-    write.table(results,paste0('results/','resultados_VT-IIT_modelo',m_selected,'_seed_',seed_def,'+',chunk_selected,'sim',start_point,'_',end_point,'.csv'),row.names=F, col.names=F, sep=',')
-  }else{write.table(results,paste0('results/','resultados_VT-IIT_modelo',m_selected,'_temp_',t_selected,'_seed_',seed_def,'+',chunk_selected,'sim',start_point,'_',end_point,'.csv'),row.names=F, col.names=F, sep=',')}
+    write.table(results,paste0('results/','resultados_VT-IIT_modelo',m_selected,'_seed_',seed_def,'+',chunk_selected,'sim',start_point,'_',end_point,'_it_',nit,'.csv'),row.names=F, col.names=F, sep=',')
+  }else{write.table(results,paste0('results/','resultados_VT-IIT_modelo',m_selected,'_temp_',t_selected,'_seed_',seed_def,'+',chunk_selected,'sim',start_point,'_',end_point,'_it_',nit,'.csv'),row.names=F, col.names=F, sep=',')}
   
   
 }
