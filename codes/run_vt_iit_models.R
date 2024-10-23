@@ -8,7 +8,9 @@ Rcpp::sourceCpp("functions/cpp_functions.cpp")
 seed_def <- 6055
 n <- 100
 p <- 200
-iterations <- 50000
+writeLines('1 is 50k iterations\n 2 is 100k iterations')
+nit <- as.numeric(readline('Select number of iterations'))
+iterations <- 50000*nit
 ##### Choose chunk of simulations to run #####
 writeLines('1 is simulations 1-20\n2 is simulations 21-40\n3 is simulations 41-60\n4 is simulations 61-80\n5 is simulations 81-100')
 chunk_selected <- as.numeric(readline('Select chunk of simulations'))
@@ -55,6 +57,6 @@ if(m_selected==0){
 }else{print('Incorrect model selected')}
 
 if(m_selected==0){
-  write.table(results,paste0('results/','resultados_VT-IIT_modelo',m_selected,'_seed_',seed_def,'+',chunk_selected,'sim',start_point,'_',end_point,'.csv'),row.names=F, col.names=F, sep=',')
-}else{write.table(results,paste0('results/','resultados_VT-IIT_modelo',m_selected,'_temp_',t_selected,'_seed_',seed_def,'+',chunk_selected,'sim',start_point,'_',end_point,'.csv'),row.names=F, col.names=F, sep=',')}
+  write.table(results,paste0('results/','resultados_VT-IIT_modelo',m_selected,'_seed_',seed_def,'+',chunk_selected,'sim',start_point,'_',end_point,'_it_',nit,'.csv'),row.names=F, col.names=F, sep=',')
+}else{write.table(results,paste0('results/','resultados_VT-IIT_modelo',m_selected,'_temp_',t_selected,'_seed_',seed_def,'+',chunk_selected,'sim',start_point,'_',end_point,'_it_',nit,'.csv'),row.names=F, col.names=F, sep=',')}
 
