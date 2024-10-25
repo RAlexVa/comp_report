@@ -628,7 +628,7 @@ double bal_func(double x,String chosen){
 ////////////////////////////////////////////////////
 
 // [[Rcpp::export]]
-vec RF_update(vec X, String chosen_bf, mat modelX, vec resY){
+vec RF_update(vec X, String chosen_bf, mat modelX, vec resY, double temperature){
   int total_neighbors = X.n_rows; // total number of neighbors is p spacial
   vec probs(total_neighbors, fill::zeros); //probabilities
   // Compute likelihood of the current state
@@ -656,9 +656,8 @@ vec RF_update(vec X, String chosen_bf, mat modelX, vec resY){
     }else{// For every other state that is not all 0s
       temporal=logLikelihood(modelX,resY,coord)-logpi_current;
     }
-    // Rcpp::Rcout << "loglik antes de bf: "<< temporal <<" en neighbor "<<j+1<< std::endl;
-    //Apply balancing function to log probabilities /////////////////////////////
-    probs(j)=bal_func(temporal, chosen_bf);
+//Apply balancing function to log probability times temperature ////
+    probs(j)=bal_func(temporal*temperature, chosen_bf);
   }
   ////////////      
   
@@ -676,24 +675,65 @@ vec RF_update(vec X, String chosen_bf, mat modelX, vec resY){
   return X;
 }
 
+//Function below is basically a copy of RF_update 
+// but it returns the Z_factor instead of the chosen neighbor
+// [[Rcpp::export]]
+double Z_factor(vec X, String chosen_bf, mat modelX, vec resY, double temperature){
+  int total_neighbors = X.n_rows; // total number of neighbors is p spacial
+  // Compute likelihood of the current state
+  vec logprobs(total_neighbors);
+  double logpi_current=0;
+  uvec current_coord = find(X==1);
+  if(current_coord.empty()){ // If the current state is all zeros
+    logpi_current=logL_0(resY);
+  }else{ // If the current state is not all zeroes
+    logpi_current = logLikelihood(modelX,resY,current_coord);
+  }
+   Rcpp::Rcout << "current loglik: "<< logpi_current << std::endl;
+  ////////////      
+  //Compute weight for all neighbors and add it to compute Z_factor
+  double Z_factor=0;
+  double temporal=0;
+  vec newX;
+  for(int j=0; j<total_neighbors;j++){
+    // Rcpp::Rcout << "Starts checking neighbors  "<< j<<std::endl; 
+    newX = X;
+    newX.row(j) = 1-X.row(j);
+    //Rcpp::Rcout << newX << std::endl;
+    uvec coord = find(newX==1);
+    //Rcpp::Rcout << coord << std::endl;
+    if(coord.empty()){// In case the state visited is all 0s
+      temporal=logL_0(resY)-logpi_current;
+    }else{// For every other state that is not all 0s
+      temporal=logLikelihood(modelX,resY,coord)-logpi_current;
+    }
+    Rcpp::Rcout <<"Loglik neighbor "<<j<<" "<< temporal << std::endl;
+    //Apply balancing function to log probability times temperature and add it////
+    logprobs.row(j)=bal_func(temporal*temperature, chosen_bf);
+    // Z_factor+=bal_func(temporal*temperature, chosen_bf);
+    Rcpp::Rcout <<"Z_factor: "<<logprobs(j) << std::endl;
+  }
+  
+  return sum(exp(logprobs))/total_neighbors;
+}
+
 // mat Simulation_mod3(int n, int p, int startsim, int endsim, int numiter, vec temp,int t)
 // [[Rcpp::export]]
 mat RF_PT_IIT_sim(int p,int startsim,int endsim, int numiter,int iterswap, vec temp, SEXP method_input){
+// Initialize variables to use in the code 
   int T=temp.n_rows; // Count the defined temperatures
   int total_sim = (endsim-startsim+1); //Count total number of simulations
   vec modes_visited(numiter * total_sim);//Matrix to store the modes visited and temperature
-  double p_double = double(p);//
   double t_double = double(T);//
   double J=t_double-1;//Number of temperatures minus 1
-  std::string method_s = Rcpp::as<std::string>(method_input);
-  // String method(method_s);
-  mat X(p,T); // The starting state of all simulations is a vector full of zeroes
+  std::string method_s = Rcpp::as<std::string>(method_input); // method to use
+  mat X(p,T); // To store the state of the joint chain
   //as many rows as neighbors
   //as many columns as temperatures
-  
-  //Initialize index process vector
-  vec index_process(T); 
-  vec temporal_vector(p);
+  vec index_process(T);   //Initialize index process vector
+  vec temporal_vector(p); // temporal vector to store updated state
+  double current_temp; // to temporarily store the temperature
+  int swap_count; //to keep track of even-odd swaps
 //Start the loop for all simulations
   for(int s=0;s<total_sim;s++){
     // Rcpp::Rcout <<"Starts sim "<< s+1 << std::endl;
@@ -711,38 +751,53 @@ mat RF_PT_IIT_sim(int p,int startsim,int endsim, int numiter,int iterswap, vec t
       // Rcpp::Rcout <<"Inside iteration loop"<< i << std::endl;
       if (i % 1000 == 1) {Rcpp::Rcout << "Simulation: " << s+startsim << " Iteration: " << i << std::endl;}
       for(int replica=0;replica<T;replica++){//For loop for replicas
+        current_temp=temp(replica);
         // Rcpp::Rcout <<"Inside replica loop "<< replica << std::endl;
         //Depending on the chosen method
         if(method_s=="M1"){ 
           // Rcpp::Rcout <<"Inicia replica "<< replica << std::endl;
-          temporal_vector = RF_update(X.col(replica), "sq",modelX,resY);
+          temporal_vector = RF_update(X.col(replica), "sq",modelX,resY,current_temp);
           // Rcpp::Rcout <<"Hace update "<< replica << std::endl;
           X.col(replica) =temporal_vector;
           // Rcpp::Rcout <<"Actualiza replica "<< replica << std::endl;
           }
         if(method_s=="M2"){//Method 2
           if(replica<J/2){
-            X.row(replica) = RF_update(X.col(replica), "sq",modelX,resY);
+            temporal_vector = RF_update(X.col(replica), "sq",modelX,resY,current_temp);
+            X.col(replica) =temporal_vector;
           }else{
-            X.row(replica) = RF_update(X.col(replica), "min",modelX,resY);
+            temporal_vector = RF_update(X.col(replica), "min",modelX,resY,current_temp);
+            X.col(replica) =temporal_vector;
           }
         }
         if(method_s=="M3"){
           if(replica<J){
-            X.row(replica) = RF_update(X.row(replica), "sq",modelX,resY);
+            temporal_vector = RF_update(X.row(replica), "sq",modelX,resY,current_temp);
+            X.col(replica) =temporal_vector;
           }else{
-            X.row(replica) = RF_update(X.row(replica), "min",modelX,resY);
+            temporal_vector = RF_update(X.row(replica), "min",modelX,resY,current_temp);
+            X.col(replica) =temporal_vector;
           }
           }
       }//End loop of replicas
       
-      if ((i+1) % iterswap == 0){//Try a replica swap
+      if ((i+1) % iterswap == 0){
+        swap_count+=1;//Increase the count of swaps
+        //Try a replica swap every iterswap number of iterations
+        //We're doing non-reversible parallel tempering
+        int starting=swap_count%2; // Detect if it's even or odd
+        for(int t=starting;t<J;t+=2){
+          Rcpp::Rcout << i << std::endl;
+        }
         
-      }  
+          vec u = Rcpp::runif(1);
+          
+        }
+        
       
     }// End loop of iterations
     // Rcpp::Rcout <<"Final state "<< X << std::endl;
-  }
+  }//End loop simulations
   return X;
 }
 
