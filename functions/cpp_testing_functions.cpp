@@ -352,6 +352,18 @@ int sample_prop(vec probs){
 }
 
 
+// [[Rcpp::export]]
+int double_for(int modulus,int n){
+  int starting=modulus%2;
+  for(int i=starting;i<n;i+=2){
+    Rcpp::Rcout << i << std::endl;
+  }
+  
+  // 
+  return n;
+}
+
+
 //////////////////////////////////
 //Some useful links
 
