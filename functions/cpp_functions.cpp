@@ -639,7 +639,7 @@ vec RF_update(vec X, String chosen_bf, mat modelX, vec resY){
   }else{ // If the current state is not all zeroes
     logpi_current = logLikelihood(modelX,resY,current_coord);
   }
-  Rcpp::Rcout << "current loglik: "<< logpi_current << std::endl;
+  // Rcpp::Rcout << "current loglik: "<< logpi_current << std::endl;
   ////////////      
   //Compute weight for all neighbors
   double temporal=0;
@@ -676,18 +676,72 @@ vec RF_update(vec X, String chosen_bf, mat modelX, vec resY){
   return X;
 }
 
-
+// mat Simulation_mod3(int n, int p, int startsim, int endsim, int numiter, vec temp,int t)
 // [[Rcpp::export]]
-vec RF_IIT_sim(int numsim, int numiter,int p){
-  vec X(p,fill::zeros); // The starting state of all simulations is a vector full of zeroes
+mat RF_PT_IIT_sim(int p,int startsim,int endsim, int numiter,int iterswap, vec temp, SEXP method_input){
+  int T=temp.n_rows; // Count the defined temperatures
+  int total_sim = (endsim-startsim+1); //Count total number of simulations
+  vec modes_visited(numiter * total_sim);//Matrix to store the modes visited and temperature
+  double p_double = double(p);//
+  double t_double = double(T);//
+  double J=t_double-1;//Number of temperatures minus 1
+  std::string method_s = Rcpp::as<std::string>(method_input);
+  // String method(method_s);
+  mat X(p,T); // The starting state of all simulations is a vector full of zeroes
+  //as many rows as neighbors
+  //as many columns as temperatures
   
-  for(int s=0;s<numsim;s++){
-    mat modelX=readmodelX(s+1);
-    vec resY=readY(s+1);
-    for(int i=0;i<numiter;i++){
-      X = RF_update(X,"sq",modelX,resY);
+  //Initialize index process vector
+  vec index_process(T); 
+  vec temporal_vector(p);
+//Start the loop for all simulations
+  for(int s=0;s<total_sim;s++){
+    // Rcpp::Rcout <<"Starts sim "<< s+1 << std::endl;
+    mat modelX=readmodelX(s+startsim); //read model matrix X
+    vec resY=readY(s+startsim); //read response vector Y
+    Rcpp::Rcout <<"Reads files "<< s+1 << std::endl;
+    for(int i=0;i<T;i++){ // Reset index process vector
+      // Rcpp::Rcout <<"Fills index process "<< i+1 << std::endl;
+      index_process.row(i)=(i+1);
     }
-    Rcpp::Rcout <<"Final state "<< X << std::endl;
+    // Rcpp::Rcout <<"Define index process "<< index_process << std::endl;
+    X.zeros();//Reset the starting point of all chains
+    // Rcpp::Rcout <<"Reset X to zeroes" << std::endl;
+    for(int i=0;i<numiter;i++){//start for loop that run iterations
+      // Rcpp::Rcout <<"Inside iteration loop"<< i << std::endl;
+      if (i % 1000 == 1) {Rcpp::Rcout << "Simulation: " << s+startsim << " Iteration: " << i << std::endl;}
+      for(int replica=0;replica<T;replica++){//For loop for replicas
+        // Rcpp::Rcout <<"Inside replica loop "<< replica << std::endl;
+        //Depending on the chosen method
+        if(method_s=="M1"){ 
+          // Rcpp::Rcout <<"Inicia replica "<< replica << std::endl;
+          temporal_vector = RF_update(X.col(replica), "sq",modelX,resY);
+          // Rcpp::Rcout <<"Hace update "<< replica << std::endl;
+          X.col(replica) =temporal_vector;
+          // Rcpp::Rcout <<"Actualiza replica "<< replica << std::endl;
+          }
+        if(method_s=="M2"){//Method 2
+          if(replica<J/2){
+            X.row(replica) = RF_update(X.col(replica), "sq",modelX,resY);
+          }else{
+            X.row(replica) = RF_update(X.col(replica), "min",modelX,resY);
+          }
+        }
+        if(method_s=="M3"){
+          if(replica<J){
+            X.row(replica) = RF_update(X.row(replica), "sq",modelX,resY);
+          }else{
+            X.row(replica) = RF_update(X.row(replica), "min",modelX,resY);
+          }
+          }
+      }//End loop of replicas
+      
+      if ((i+1) % iterswap == 0){//Try a replica swap
+        
+      }  
+      
+    }// End loop of iterations
+    // Rcpp::Rcout <<"Final state "<< X << std::endl;
   }
   return X;
 }
