@@ -192,6 +192,7 @@ check_modes(c(0,0,0,0,1,0,1,1,rep(0,192)))+1
 
 check_modes(c(1,1,1,1,rep(0,196)))+1
 ########### Checking multimodality ##############
+Rcpp::sourceCpp("functions/cpp_testing_functions.cpp")
 mod1 <- c(1,1,1, rep(0,197))
 mod2 <- c(1,1,0,1, rep(0,196))
 mod3 <- c(1,0,1,1, rep(0,196))
@@ -199,7 +200,7 @@ mod4 <- c(0,0,0,0,1,1,1,rep(0,193))
 mod5 <- c(0,0,0,0,1,1,0,1,rep(0,192))
 mod6 <- c(0,0,0,0,1,0,1,1,rep(0,192))
 
-selected <- 100
+selected <- 18
 Y_res <- read_Y_cpp(paste0('models/resY',selected,'.csv'))
 X_model <- read_file_cpp(paste0('models/modelX',selected,'.csv'))
 
@@ -210,17 +211,18 @@ logLikelihood_m(X_model, Y_res,which(mod4==1)-1)
 logLikelihood_m(X_model, Y_res,which(mod5==1)-1)
 logLikelihood_m(X_model, Y_res,which(mod6==1)-1)
 
-a <- logLikelihood_m(X_model, Y_res,which(mod1==1)-1)
-logLikelihood_m(X_model, Y_res,c(which(mod1==1))-1)
-logLikelihood_m(X_model, Y_res,c(1,2,3,10)-1)
-# c(1.2926,1.2922,1.2964)%*%c(1.2926,1.2922,1.2964)
-c(1.2928,1.2919,1.2967,.0076)%*%c(1.2928,1.2919,1.2967,.0076)
+tocheck <- mod6
+(a <- logLikelihood_m(X_model, Y_res,which(tocheck==1)-1))
+
 compare <- c()
 for(i in 1:length(mod1)){
-  newstate <- mod1
+  newstate <- tocheck
   newstate[i] <- 1-newstate[i]
-  compare[i] <- logLikelihood(X_model, Y_res,which(newstate==1)-1)>a
+  lll <- logLikelihood(X_model, Y_res,which(newstate==1)-1)
+  print(lll)
+  compare[i] <- lll>a
 }
+sum(compare)
 #Checking this likelihood
 mod5 <- c(0,0,0,0,1,1,0,1,rep(0,192))
 logLikelihood(X_model, Y_res,which(mod5==1)-1)
@@ -271,7 +273,11 @@ Simulation_mod3(n=n,p=p,startsim=1,endsim=100,numiter=1,temp=temp,t=length(temp)
 Simulation_mod_IIT(n=n,p=p,startsim=1,endsim=100,numiter=1)
 
 
-
+########### Testing IIT function que está escribiendo arameo ##############
+Rcpp::sourceCpp("functions/cpp_functions.cpp")
+n <- 100
+p <- 200
+test1 <- Simulation_mod_IIT(n=n,p=p,startsim = 1, endsim=20,numiter=1000)
 
 
 #######################################
@@ -300,95 +306,39 @@ X_input <- rep(0,p);
 #mat test_mat(mat M, vec X, vec t, int curr_temp, int p)
 test_mat(ma,X_input,p)
 
-# update_logpsi(c(1,2,3,4,5),2,10,5)
+######  Testing functions for parallel tempering #############
+#rm(list=ls())
+library(Rcpp)
+library(RcppArmadillo)
+Rcpp::sourceCpp("functions/cpp_functions.cpp")
 
-# library(dplyr)
-# set.seed(134)
-# temperature <- temp[curr_temp+1]
-# coord <- which(X==1)+1
-# t <- length(temp)
-# logpi_r <- c(p+t)
-# data <- as.data.frame(cbind(res$Y,res$X))
-# logpi_current <- logLik(lm(V1 ~.-1, data=as.data.frame(data[,c(1,coord)])))[1]
-# for(i in 1:p){
-#   Xnew <- X;
-#   Xnew[i] <- 1-X[i];
-#   variables <- which(Xnew==1);
-#   if(length(variables)==0){
-#     data_s <- data |>  select('V1');
-#     mod <- lm(V1 ~., data=data_s)
-#   }else{
-#     data_s <- data[,c(1,variables+1)] #Include column 1 since it's Y, shift indexes to consider column Y
-#     mod <- lm(V1 ~.-1, data=data_s)
-#   }
-# logpi_r[i] <- exp(min((logLik(mod)[1] - logpi_current)*temperature,0))/length(X)
-# }
-# for(i in 1:t){
-#   if(temp[i]==temperature){logpi_r[p+i] <- 0}else{
-#   logpi_r[p+i] <- exp(min(logpi_current*(temp[i]-temperature),0))/(length(temp)-1)
-# }}
-# logpi_r
-# u <- runif(p+t)
-# which.min(-log(u)/logpi_r)
+matX <- readmodelX(1)
+resY <- readY(1)
+cur <- logL_0(resY)
+Z_factor(rep(0,200),'sq',modelX=matX,resY=resY, temperature=1)
+Z_factor(rep(0,200),'min',modelX=matX,resY=resY, temperature=1)
+Z_factor(c(1,1,1,rep(0,197)),'sq',modelX=matX,resY=resY, temperature=1) #Small Z_h for a mode
+Z_factor(c(1,1,1,rep(0,197)),'min',modelX=matX,resY=resY, temperature=1) #Small Z_h for a mode
+# Z_factor(vec X, String chosen_bf, mat modelX, vec resY, double temperature)
+logLikelihood(matX,resY,c(0))-cur
+logLikelihood(matX,resY,c(1))-cur
+logLikelihood(matX,resY,c(2))-cur
+logLikelihood(matX,resY,c(3))-cur
+logLikelihood(matX,resY,c(4))-cur
+logLikelihood(matX,resY,c(5))-cur
+logLikelihood(matX,resY,c(6))-cur
 
+RF_IIT_sim(2,100,200)
 
-### Compare
-# fun_dummy_1 <- function(X=X,
-#                         temp=temp,
-#                         curr_temp=curr_temp,
-#                         modelX=res$X,
-#                         resY=res$Y,
-#                         n=length(X),
-#                         t=length(temp)){
-#   return(VT_IIT_update_c1(X=X,
-#                           temp=temp,
-#                           curr_temp=curr_temp,
-#                           modelX=res$X,
-#                           resY=res$Y,
-#                           n=length(X),
-#                           t=length(temp)))
-# }
-# 
-# fun_dummy_2 <- function(X=X,
-#                         temp=temp,
-#                         curr_temp=curr_temp,
-#                         modelX=res$X,
-#                         resY=res$Y,
-#                         n=length(X),
-#                         t=length(temp)){
-#   temperature <- temp[curr_temp+1]
-#   coord <- which(X==1)+1
-#   t <- length(temp)
-#   logpi_r <- c(p+t)
-#   data <- as.data.frame(cbind(res$Y,res$X))
-#   logpi_current <- logLik(lm(V1 ~.-1, data=as.data.frame(data[,c(1,coord)])))[1]
-#   for(i in 1:p){
-#     Xnew <- X;
-#     Xnew[i] <- 1-X[i];
-#     variables <- which(Xnew==1);
-#     if(length(variables)==0){
-#       data_s <- data |>  select('V1');
-#       mod <- lm(V1 ~., data=data_s)
-#     }else{
-#       data_s <- data[,c(1,variables+1)] #Include column 1 since it's Y, shift indexes to consider column Y
-#       mod <- lm(V1 ~.-1, data=data_s)
-#     }
-#     logpi_r[i] <- exp(min((logLik(mod)[1] - logpi_current)*temperature,0))/length(X)
-#   }
-#   for(i in 1:t){
-#     if(temp[i]==temperature){logpi_r[p+i] <- 0}else{
-#       logpi_r[p+i] <- exp(min(logpi_current*(temp[i]-temperature),0))/(length(temp)-1)
-#     }}
-#   logpi_r
-#   
-#   u <- runif(p+t)
-#   
-#   index_n <- which.min(-log(u)/logpi_r)
-#   if(index_n<=p){X[index_n] <- 1-X[index_n]}else{
-#     temperature = temp[index_n-p]
-#   }
-#   
-#   return(list(temperature,logpi_r,X,))
-# }
-# 
-# microbenchmark(fun_dummy_1, fun_dummy_2, times=1000)
+test_coord(c(1,0,0,0,0,1,0,0,1))
+test_coord(c(0,0,0,0,0))
+
+temp1.1 <- (1+((1:5)-1))^(-1)
+temp1.2 <- (1+((1:10)-1))^(-1)
+temp2.1 <- (1+((1:5)-1)*2)^(-1)
+temp2.2 <- (1+((1:10)-1)*2)^(-1)
+temp <- temp1.1
+
+check <- RF_PT_IIT_sim(p=200,startsim=1,endsim=1,numiter=100,iterswap=200,temp=temp,method="M1")
+
+ccc <- RF_update(rep(0,20), "sq",matX,resY)
