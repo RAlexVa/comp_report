@@ -364,6 +364,99 @@ int double_for(int modulus,int n){
 }
 
 
+
+// [[Rcpp::export]]
+mat index_pro(int p, vec temp, int numswap, double swap_prob ){
+  //p is neighbors
+  //temp is the temperatures and we start in standard index process
+  int T=temp.n_rows; // Count the defined temperatures
+  int swap_count=0;
+  vec epsilon_indic(T);
+  vec prop_swap(T); //vector to indicate a proposed swap
+  vec do_swap(T); //vector to indicate actually perform a swap
+  vec resulting_swap(T);
+  vec ppp;
+  double t_double = double(T);//
+  double J=t_double-1;//Number of temperatures minus 1
+  
+  mat ind_pro_hist(numswap,T);
+  //Initialize model
+  mat X(p,T, fill::randu);
+  X=round(X);
+  Rcpp::Rcout <<"Starting state: \n"<< X << std::endl;
+  
+  //Initialize index process
+  vec index_process(T);
+  for(int i=0;i<T;i++){ // Reset index process vector
+    // Rcpp::Rcout <<"Fills index process "<< i+1 << std::endl;
+    index_process.row(i)=i;
+  }
+  Rcpp::Rcout << "starting index process: \n"<<index_process << std::endl;
+  //Try replica swaps
+  for(int i=0;i<numswap;i++){
+  swap_count+=1;//Increase the count of swaps
+  epsilon_indic.fill(-1); //Epsilon indic starts as -1
+  prop_swap.zeros();
+  do_swap.zeros();
+  //Try a replica swap every iterswap number of iterations
+  //We're doing non-reversible parallel tempering
+  int starting=swap_count%2; // Detect if it's even or odd
+  Rcpp::Rcout <<"Starting at:  "<< starting << std::endl;
+  for(int t=starting;t<J;t+=2){
+    Rcpp::Rcout <<"Swapping "<< t << std::endl;
+    epsilon_indic.elem(find(index_process==t)).ones(); 
+    prop_swap.elem(find(index_process==t)).ones(); //we swap temperature t
+    prop_swap.elem(find(index_process==t+1)).ones(); //Woth t+1
+    // ppp =Rcpp::rbinom(1,1,swap_prob);
+    // Rcpp::Rcout << ppp(0) << std::endl;
+    // do_swap(t) = ppp(0); // check if the swap happens or not
+    ppp=Rcpp::runif(1);
+    if(ppp(0)<swap_prob){//In case the swap is accepted
+      do_swap.elem(find(index_process==t)).ones();
+      do_swap.elem(find(index_process==t+1)).ones();
+    }
+    
+  }
+  Rcpp::Rcout <<"Epsilon vector: \n"<< epsilon_indic << std::endl;
+  Rcpp::Rcout <<"Prop vector: \n"<< prop_swap << std::endl;
+  Rcpp::Rcout <<"Swap vector: \n"<< do_swap << std::endl;
+  resulting_swap=epsilon_indic % prop_swap % do_swap;
+  index_process+=resulting_swap;
+  Rcpp::Rcout <<"Resulting swap: \n"<< resulting_swap << std::endl;
+  Rcpp::Rcout <<"New index process: \n"<< index_process << std::endl;
+  ind_pro_hist.row(i)=index_process.t();
+}
+  return ind_pro_hist;
+}
+
+// [[Rcpp::export]]
+mat random_binom(int rows,int columns,int n, double p){
+  mat X(rows,columns);
+  // mat X(rows,columns, fill::randu);
+  // X.randu();
+  // Rcpp::Rcout << X << std::endl;
+  // X=round(X);
+  X=Rcpp::rbinom(rows*columns,1,0.3);
+  X.reshape(rows,columns);
+  return X;
+}
+
+// [[Rcpp::export]]
+double loglik(mat X, colvec Y, uvec coord){
+  double loglik;
+  if(coord.empty()){
+    loglik=logL_0(Y);
+  }else{
+    loglik=logLikelihood(X,Y,coord);
+  }
+  return loglik;
+}
+
+// [[Rcpp::export]]
+double test_loglik(vec state,mat modelX, colvec Y){
+  return loglik(modelX,Y,find(state==1));
+}
+
 //////////////////////////////////
 //Some useful links
 
