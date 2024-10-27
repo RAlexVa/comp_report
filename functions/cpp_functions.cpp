@@ -39,6 +39,20 @@ double logL_0(colvec Y){
   double logl = -0.5*(n*log(2*M_PI) + n*log(rss) -n*log(n) + n);
   return logl;
 }
+
+//Function that convines both above
+// [[Rcpp::export]]
+double loglik(mat X, colvec Y, uvec coord){
+  double loglik;
+  if(coord.empty()){
+    loglik=logL_0(Y);
+  }else{
+    loglik=logLikelihood(X,Y,coord);
+  }
+  return loglik;
+}
+
+
 //Update the vector of logpsi
 // [[Rcpp::export]]
 vec update_logpsi(vec logpsi, int curr_temp, double iteration, int J){
@@ -689,10 +703,10 @@ double Z_factor(vec X, String chosen_bf, mat modelX, vec resY, double temperatur
   }else{ // If the current state is not all zeroes
     logpi_current = logLikelihood(modelX,resY,current_coord);
   }
-   Rcpp::Rcout << "current loglik: "<< logpi_current << std::endl;
+   // Rcpp::Rcout << "current loglik: "<< logpi_current << std::endl;
   ////////////      
   //Compute weight for all neighbors and add it to compute Z_factor
-  double Z_factor=0;
+  // double Z_factor=0;
   double temporal=0;
   vec newX;
   for(int j=0; j<total_neighbors;j++){
@@ -707,11 +721,11 @@ double Z_factor(vec X, String chosen_bf, mat modelX, vec resY, double temperatur
     }else{// For every other state that is not all 0s
       temporal=logLikelihood(modelX,resY,coord)-logpi_current;
     }
-    Rcpp::Rcout <<"Loglik neighbor "<<j<<" "<< temporal << std::endl;
+    // Rcpp::Rcout <<"Loglik neighbor "<<j<<" "<< temporal << std::endl;
     //Apply balancing function to log probability times temperature and add it////
     logprobs.row(j)=bal_func(temporal*temperature, chosen_bf);
     // Z_factor+=bal_func(temporal*temperature, chosen_bf);
-    Rcpp::Rcout <<"Z_factor: "<<logprobs(j) << std::endl;
+    // Rcpp::Rcout <<"Z_factor: "<<logprobs(j) << std::endl;
   }
   
   return sum(exp(logprobs))/total_neighbors;
@@ -719,18 +733,30 @@ double Z_factor(vec X, String chosen_bf, mat modelX, vec resY, double temperatur
 
 // mat Simulation_mod3(int n, int p, int startsim, int endsim, int numiter, vec temp,int t)
 // [[Rcpp::export]]
-mat RF_PT_IIT_sim(int p,int startsim,int endsim, int numiter,int iterswap, vec temp, SEXP method_input){
+List RF_PT_IIT_sim(int p,int startsim,int endsim, int numiter,int iterswap, vec temp, SEXP method_input){
 // Initialize variables to use in the code 
   int T=temp.n_rows; // Count the defined temperatures
   int total_sim = (endsim-startsim+1); //Count total number of simulations
-  vec modes_visited(numiter * total_sim);//Matrix to store the modes visited and temperature
-  double t_double = double(T);//
-  double J=t_double-1;//Number of temperatures minus 1
+  mat modes_visited(numiter * total_sim,T);//Matrix to store the modes visited and temperature
+  double J=double(T)-1;//Number of temperatures minus 1
   std::string method_s = Rcpp::as<std::string>(method_input); // method to use
   mat X(p,T); // To store the state of the joint chain
   //as many rows as neighbors
   //as many columns as temperatures
   vec index_process(T);   //Initialize index process vector
+  int total_swaps=trunc(numiter/iterswap);
+  mat ind_pro_hist(total_swaps*total_sim,T); //To store evolution of index process
+//Variables to update index process
+  vec epsilon_indic(T); //Vector that indicates if the entry of the index process is proposed to change
+  vec prop_swap(T); //vector to indicate a proposed swap
+  vec do_swap(T); //vector to indicate actually perform a swap
+  vec resulting_swap(T);//Vector to update the index process
+  vec ppp; //To store the probability of replica swap
+  double Z_fact_correc;//to temporarily store Z_factor correction
+  double swap_prob;
+  vec Xtemp_from(p);
+  vec Xtemp_to(p);
+//Finish variables to update index process
   vec temporal_vector(p); // temporal vector to store updated state
   double current_temp; // to temporarily store the temperature
   int swap_count; //to keep track of even-odd swaps
@@ -739,11 +765,12 @@ mat RF_PT_IIT_sim(int p,int startsim,int endsim, int numiter,int iterswap, vec t
     // Rcpp::Rcout <<"Starts sim "<< s+1 << std::endl;
     mat modelX=readmodelX(s+startsim); //read model matrix X
     vec resY=readY(s+startsim); //read response vector Y
-    Rcpp::Rcout <<"Reads files "<< s+1 << std::endl;
+    // Rcpp::Rcout <<"Read files "<< s+startsim << std::endl;
     for(int i=0;i<T;i++){ // Reset index process vector
       // Rcpp::Rcout <<"Fills index process "<< i+1 << std::endl;
-      index_process.row(i)=(i+1);
+      index_process.row(i)=i;
     }
+    swap_count=0; //Reset swap count
     // Rcpp::Rcout <<"Define index process "<< index_process << std::endl;
     X.zeros();//Reset the starting point of all chains
     // Rcpp::Rcout <<"Reset X to zeroes" << std::endl;
@@ -751,54 +778,94 @@ mat RF_PT_IIT_sim(int p,int startsim,int endsim, int numiter,int iterswap, vec t
       // Rcpp::Rcout <<"Inside iteration loop"<< i << std::endl;
       if (i % 1000 == 1) {Rcpp::Rcout << "Simulation: " << s+startsim << " Iteration: " << i << std::endl;}
       for(int replica=0;replica<T;replica++){//For loop for replicas
-        current_temp=temp(replica);
+        current_temp=temp(index_process(replica));
         // Rcpp::Rcout <<"Inside replica loop "<< replica << std::endl;
         //Depending on the chosen method
         if(method_s=="M1"){ 
           // Rcpp::Rcout <<"Inicia replica "<< replica << std::endl;
-          temporal_vector = RF_update(X.col(replica), "sq",modelX,resY,current_temp);
-          // Rcpp::Rcout <<"Hace update "<< replica << std::endl;
-          X.col(replica) =temporal_vector;
+          // temporal_vector = RF_update(X.col(replica), "sq",modelX,resY,current_temp);
+          // X.col(replica) =temporal_vector;
+          X.col(replica) = RF_update(X.col(replica), "sq",modelX,resY,current_temp);
           // Rcpp::Rcout <<"Actualiza replica "<< replica << std::endl;
           }
         if(method_s=="M2"){//Method 2
           if(replica<J/2){
-            temporal_vector = RF_update(X.col(replica), "sq",modelX,resY,current_temp);
-            X.col(replica) =temporal_vector;
+            // temporal_vector = RF_update(X.col(replica), "sq",modelX,resY,current_temp);
+            // X.col(replica) =temporal_vector;
+            X.col(replica) = RF_update(X.col(replica), "sq",modelX,resY,current_temp);
           }else{
-            temporal_vector = RF_update(X.col(replica), "min",modelX,resY,current_temp);
-            X.col(replica) =temporal_vector;
+            // temporal_vector = RF_update(X.col(replica), "min",modelX,resY,current_temp);
+            // X.col(replica) = temporal_vector;
+            X.col(replica) = RF_update(X.col(replica), "min",modelX,resY,current_temp);
           }
         }
         if(method_s=="M3"){
           if(replica<J){
-            temporal_vector = RF_update(X.row(replica), "sq",modelX,resY,current_temp);
-            X.col(replica) =temporal_vector;
+            // temporal_vector = RF_update(X.row(replica), "sq",modelX,resY,current_temp);
+            // X.col(replica) =temporal_vector;
+            X.col(replica) = RF_update(X.row(replica), "sq",modelX,resY,current_temp);
           }else{
-            temporal_vector = RF_update(X.row(replica), "min",modelX,resY,current_temp);
-            X.col(replica) =temporal_vector;
+            // temporal_vector = RF_update(X.row(replica), "min",modelX,resY,current_temp);
+            // X.col(replica) = temporal_vector;
+            X.col(replica) = RF_update(X.row(replica), "min",modelX,resY,current_temp);
           }
           }
-      }//End loop of replicas
+      }//End loop to update replicas
       
+      //Start replica swap process
       if ((i+1) % iterswap == 0){
         swap_count+=1;//Increase the count of swaps
+        epsilon_indic.fill(-1); //Epsilon indic starts as -1
+        prop_swap.zeros();
+        do_swap.zeros();
         //Try a replica swap every iterswap number of iterations
         //We're doing non-reversible parallel tempering
         int starting=swap_count%2; // Detect if it's even or odd
+        // Rcpp::Rcout <<"Trying replica swap "<<swap_count<<" start: "<<starting <<" at iteration: "<< i << std::endl;
         for(int t=starting;t<J;t+=2){
-          Rcpp::Rcout << i << std::endl;
+          // Rcpp::Rcout <<"Swapping "<< t << std::endl;
+          epsilon_indic.elem(find(index_process==t)).ones(); 
+          prop_swap.elem(find(index_process==t)).ones(); //we swap temperature t
+          prop_swap.elem(find(index_process==t+1)).ones(); //Woth t+1
+          //Compute swap probability
+          Xtemp_from=X.cols(find(index_process==t));
+          vec Xtemp_to=X.cols(find(index_process==t+1));
+          swap_prob=(temp(t)-temp(t+1))*(loglik(modelX,resY,find(Xtemp_to==1)) - loglik(modelX,resY,find(Xtemp_from==1)));
+          // Rcpp::Rcout <<"ratio of pis: "<< swap_prob << std::endl;
+          Z_fact_correc=Z_factor(Xtemp_from, "sq",modelX,resY, temp(t+1))*Z_factor(Xtemp_to, "sq",modelX,resY, temp(t))/(Z_factor(Xtemp_from, "sq",modelX,resY, temp(t))*Z_factor(Xtemp_to, "sq",modelX,resY, temp(t+1)));
+          // Rcpp::Rcout <<"Z factor "<< Z_fact_correc << std::endl;
+          swap_prob=Z_fact_correc*exp(swap_prob);
+          // Rcpp::Rcout <<"Swap prob "<< swap_prob << std::endl;
+          // if(swap_prob>1){Rcpp::Rcout <<"Error, swap prob >1 " << std::endl;} // This is not an error is just that the swap surely is accepted
+          // swap_prob=1;
+          ppp=Rcpp::runif(1);
+          if(ppp(0)<swap_prob){//In case the swap is accepted
+            // Rcpp::Rcout <<"Accepted swap "<< t << std::endl;
+            do_swap.elem(find(index_process==t)).ones();
+            do_swap.elem(find(index_process==t+1)).ones();
+          }
         }
-        
-          vec u = Rcpp::runif(1);
-          
-        }
-        
+        resulting_swap=epsilon_indic % prop_swap % do_swap;
+        // Rcpp::Rcout <<"Resulting swap "<< resulting_swap << std::endl;
+        index_process+=resulting_swap;
+         // Rcpp::Rcout <<"New index process:\n "<< index_process << std::endl;
+        ind_pro_hist.row((s*total_swaps)+swap_count-1)=index_process.t();
+        // Rcpp::Rcout <<"Store index process " << std::endl;
+        }//End of replica swap process
+      
+  //Check if modes were visited in each replica
+  for(int replica=0;replica<T;replica++){
+    // Rcpp::Rcout <<"Checking mode visiting at replica: "<< replica << std::endl;
+    modes_visited((s*numiter)+i,replica)=check_modes(X.col(replica))+1; 
+  }
       
     }// End loop of iterations
     // Rcpp::Rcout <<"Final state "<< X << std::endl;
   }//End loop simulations
-  return X;
+  List ret;
+  ret["modes"]=modes_visited;
+  ret["ip"]=ind_pro_hist;
+  return ret;
 }
 
 
