@@ -1,0 +1,46 @@
+#if(!require('Rcpp')){install.packages('Rcpp')}
+library(Rcpp)
+library(RcppArmadillo)
+setwd('..')
+Rcpp::sourceCpp("functions/cpp_functions.cpp")
+
+#Define parameters for the model
+seed_def <- 6055
+n <- 100
+p <- 200
+
+iterations <- 20000
+
+##### Choose the temperature ladder to use #####
+temp1.1 <- (1+((1:5)-1))^(-1) #J=4, Delta=1
+temp1.2 <- (1+((1:10)-1))^(-1) #J=9, Delta=1
+temp2.1 <- (1+((1:5)-1)*2)^(-1) #J=4, Delta=2
+temp2.2 <- (1+((1:10)-1)*2)^(-1) #J=10, Delta=2
+
+writeLines('1 is D=1,5 temperatures\n2 is D=1,10 temperatures\n3 is D=2,5 temperatures\n4 is D=2,10 temperatures')
+t_selected <- as.numeric(readline('Select temperature ladder'))
+if(t_selected==1){
+  temp <- temp1.1  
+}else if(t_selected==2){
+  temp <- temp1.2
+}else if(t_selected==3){
+  temp <- temp2.1
+}else if(t_selected==4){
+  temp <- temp2.2
+}else{print('Incorrect model selected')}
+
+##### Choose method #####
+#0 is iit, and there are other 3 methods depending on balancing functions for
+writeLines('Por ahora solo sirve model 1')
+m_selected <- "M1"
+for(chunk_selected in 1:5){
+  start_point <- 1+(chunk_selected-1)*20
+  end_point <- chunk_selected*20
+  set.seed(seed_def + chunk_selected)
+  results <- RF_PT_IIT_sim(p=p,startsim=start_point, endsim=end_point, numiter=iterations, iterswap=100, temp=temp, method=m_selected)
+  write.table(results$modes,paste0('results/','resultados_PT-IIT_modelo',m_selected,'_temp_',t_selected,'_seed_',seed_def,'+',chunk_selected,'sim',start_point,'_',end_point,'_modes','.csv'),row.names=F, col.names=F, sep=',')  
+  write.table(results$ip,paste0('results/','resultados_VT-IIT_modelo',m_selected,'_temp_',t_selected,'_seed_',seed_def,'+',chunk_selected,'sim',start_point,'_',end_point,'_ip','.csv'),row.names=F, col.names=F, sep=',')  
+}
+
+
+
