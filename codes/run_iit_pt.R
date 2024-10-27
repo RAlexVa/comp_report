@@ -8,7 +8,6 @@ Rcpp::sourceCpp("functions/cpp_functions.cpp")
 seed_def <- 6055
 n <- 100
 p <- 200
-
 iterations <- 20000
 
 ##### Choose the temperature ladder to use #####
@@ -30,9 +29,10 @@ if(t_selected==1){
 }else{print('Incorrect model selected')}
 
 ##### Choose method #####
-#0 is iit, and there are other 3 methods depending on balancing functions for
-writeLines('Por ahora solo sirve model 1')
-m_selected <- "M1"
+
+writeLines('method 1 min bal. fun. for all\nmethod 2 half & half bal. fun.\nmethod 3 only max temp is different')
+m_selected <- paste0("M",as.numeric(readline('Select method')))
+
 for(chunk_selected in 1:5){
   start_point <- 1+(chunk_selected-1)*20
   end_point <- chunk_selected*20
