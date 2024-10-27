@@ -311,6 +311,16 @@ test_mat(ma,X_input,p)
 library(Rcpp)
 library(RcppArmadillo)
 Rcpp::sourceCpp("functions/cpp_functions.cpp")
+Rcpp::sourceCpp("functions/cpp_testing_functions.cpp")
+
+test_loglik(c(1,1,1),matX,resY)
+logLikelihood(matX,resY,c(0,1,2))
+test_loglik(c(0,0,0,0,0),matX,resY)
+logL_0(resY)
+# RF_PT_IIT_sim(int p,int startsim,int endsim, int numiter,int iterswap, vec temp, SEXP method_input)
+
+test <- RF_PT_IIT_sim(p=200,startsim=1, endsim=1, numiter=50, iterswap=10, temp=1/1:5, method='M1')
+
 
 matX <- readmodelX(1)
 resY <- readY(1)
@@ -342,3 +352,15 @@ temp <- temp1.1
 check <- RF_PT_IIT_sim(p=200,startsim=1,endsim=1,numiter=100,iterswap=200,temp=temp,method="M1")
 
 ccc <- RF_update(rep(0,20), "sq",matX,resY)
+
+########### Testing the index process ##############
+#rm(list=ls())
+Rcpp::sourceCpp("functions/cpp_testing_functions.cpp")
+#Rcpp::sourceCpp("functions/cpp_functions.cpp")
+random_binom(5,3,1,2)
+set.seed(123)
+random_binom(7,5,1,2)
+
+
+#index_pro(int p, vec temp, int numswap, double swap_prob )
+index_pro(10,c(1,1/2,1/3,1/4,1/5),20,0.7)
