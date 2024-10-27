@@ -318,8 +318,37 @@ logLikelihood(matX,resY,c(0,1,2))
 test_loglik(c(0,0,0,0,0),matX,resY)
 logL_0(resY)
 # RF_PT_IIT_sim(int p,int startsim,int endsim, int numiter,int iterswap, vec temp, SEXP method_input)
+#### checking usage of distinct balancing functions for different methods
+set.seed(123)
+test1 <- RF_PT_IIT_sim(p=200,startsim=1, endsim=1, numiter=50, iterswap=10, temp=1/1:5, method='M1')
+set.seed(123)
+test2 <- RF_PT_IIT_sim(p=200,startsim=1, endsim=1, numiter=50, iterswap=10, temp=1/1:5, method='M2')
+set.seed(123)
+test3 <- RF_PT_IIT_sim(p=200,startsim=1, endsim=1, numiter=50, iterswap=10, temp=1/1:5, method='M3')
 
-test <- RF_PT_IIT_sim(p=200,startsim=1, endsim=1, numiter=50, iterswap=10, temp=1/1:5, method='M1')
+identical(test1$modes,test2$modes)
+identical(test2$modes,test3$modes)
+identical(test3$modes,test1$modes)
+
+identical(test1$ip,test2$ip)
+identical(test2$ip,test3$ip)
+identical(test3$ip,test1$ip)
+### Now for 10 temperatures
+set.seed(123)
+test1 <- RF_PT_IIT_sim(p=200,startsim=1, endsim=1, numiter=50, iterswap=10, temp=1/1:10, method='M1')
+set.seed(123)
+test2 <- RF_PT_IIT_sim(p=200,startsim=1, endsim=1, numiter=50, iterswap=10, temp=1/1:10, method='M2')
+set.seed(123)
+test3 <- RF_PT_IIT_sim(p=200,startsim=1, endsim=1, numiter=50, iterswap=10, temp=1/1:10, method='M3')
+
+identical(test1$modes,test2$modes)
+identical(test2$modes,test3$modes)
+identical(test3$modes,test1$modes)
+
+identical(test1$ip,test2$ip)
+identical(test2$ip,test3$ip)
+identical(test3$ip,test1$ip)
+
 
 
 matX <- readmodelX(1)
