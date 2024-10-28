@@ -823,7 +823,7 @@ List RF_PT_IIT_sim(int p,int startsim,int endsim, int numiter,int iterswap, vec 
         int starting=swap_count%2; // Detect if it's even or odd
         // Rcpp::Rcout <<"Trying replica swap "<<swap_count<<" start: "<<starting <<" at iteration: "<< i << std::endl;
         for(int t=starting;t<J;t+=2){
-           Rcpp::Rcout <<"Method:"<<method_s<<" Swapping "<< t <<", J: "<<J<< std::endl;
+           // Rcpp::Rcout <<"Method:"<<method_s<<" Swapping "<< t <<", J: "<<J<< std::endl;
           epsilon_indic.elem(find(index_process==t)).ones(); 
           prop_swap.elem(find(index_process==t)).ones(); //we swap temperature t
           prop_swap.elem(find(index_process==t+1)).ones(); //Woth t+1
@@ -846,8 +846,8 @@ if(method_s=="M3"){//Method 3
   if(t<J){bal_from.push_back("sq");}else{bal_from.push_back("min");}
   if((t+1)<J){bal_to.push_back("sq");}else{bal_to.push_back("min");}
 }
-Rcpp::Rcout <<"bal from: "<< std::string(bal_from) << std::endl;
-Rcpp::Rcout <<"bal to: "<< std::string(bal_to) << std::endl;
+// Rcpp::Rcout <<"bal from: "<< std::string(bal_from) << std::endl;
+// Rcpp::Rcout <<"bal to: "<< std::string(bal_to) << std::endl;
 
           swap_prob=(temp(t)-temp(t+1))*(loglik(modelX,resY,find(Xtemp_to==1)) - loglik(modelX,resY,find(Xtemp_from==1)));
           // Rcpp::Rcout <<"ratio of pis: "<< swap_prob << std::endl;
