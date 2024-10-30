@@ -10,16 +10,18 @@ data_u <- tibble(r=x,
                  sq=sqrt(x),
                  max=sapply(x,max,1))
 
-plot1 <- data_u |> pivot_longer(-r,names_to = "b.fun",values_to = 'h(r)') |>  
+(plot1 <- data_u |> pivot_longer(-r,names_to = "b.fun",values_to = 'h(r)') |>  
   ggplot(aes(x=r,y=`h(r)`,color = `b.fun`))+
   geom_line(size=1)+
   geom_segment(aes(x=0.5,y=0,xend=0.5,yend=1),color = "blue", linetype = "dashed", size = 1)+
   geom_segment(aes(x=3.5,y=0,xend=3.5,yend=3.5),color = "red", linetype = "dashed", size = 1)+
-  annotate("text", x=0.7, y=0, label= TeX("$y_1$"),size=4, color='blue')+
-  annotate("text", x=3.7, y=0, label= TeX("$y_2$"),size=4, color='red')
+  annotate("text", x=0.7, y=0, label= TeX("$y_1$"),size=6, color='blue')+
+  annotate("text", x=3.7, y=0, label= TeX("$y_2$"),size=6, color='red')+
+  theme(axis.text=element_text(size=15),axis.title=element_text(size=14)))
   
-
-
+jpeg("C:/Users/ralex/Documents/src/comp_report/compare_balancing.jpeg", width = 850, height = 300)
+plot1
+dev.off()
 ##### Bounded BF #####
 bounded_bf <- function(t,f,K=3){
   return(min(min(f(t),K),t*min(f(1/t),K)))
