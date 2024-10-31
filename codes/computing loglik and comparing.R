@@ -420,7 +420,7 @@ test_geom(4.98435e-15)
 ########### Testing PT-IIT Adaptive  ##############
 Rcpp::sourceCpp("functions/cpp_functions.cpp")
 set.seed(123)
-test1 <- PT_IIT_adapt_sim(p=200,startsim=1, endsim=10, L_samples=1000, total_swaps=50, temp=1/1:5, method='M1')
+test1 <- PT_IIT_adapt_sim(p=200,startsim=1, endsim=100, L_samples=1000, total_swaps=25, temp=1/1:5, method='M1')
 matX <- readmodelX(1)
 resY <- readY(1)
 IIT_update_adp_bound(X=c(0,0,0,0,1,1,1,rep(0,193)), "sq", modelX=matX,resY=resY, temperature=0.5,log_bound=0)
@@ -430,7 +430,7 @@ IIT_update_adp_bound(X=c(0,0,0,0,1,1,1,rep(0,193)), "sq", modelX=matX,resY=resY,
 IIT_update_adp_bound(X=c(0,0,0,0,0,1,1,rep(0,193)), "sq", modelX=matX,resY=resY, temperature=1,log_bound=0)
 
 bounded_bal_func(log(10),"sq",log(3))
-bounded_bal_func(-.2,"sq",log(3))
+
 bounded_bal_func(.2,"sq",log(3))
 bounded_bal_func(.4,"sq",log(3))
 bounded_bal_func(1,"sq",log(3))
@@ -438,11 +438,26 @@ bounded_bal_func(2,"sq",log(3))
 bounded_bal_func(2.1,"sq",log(3))
 bounded_bal_func(22,"sq",log(3))
 
-sapply(log(seq(0.1,2.5,by=0.1)),bounded_bal_func,"sq",log(3))
 
+
+sapply(log(seq(0.1,10,by=0.1)),bounded_bal_func,"sq",5)
+sapply(log(seq(21500,22500,by=10)),bounded_bal_func,"sq",5)
+
+sapply(log(seq(100,150,by=1)),bounded_bal_func,"min",5)
+
+sapply(log(seq(0.1,2.5,by=0.1)),bounded_bal_func,"sq",5)
 exp(sapply(log(seq(0.1,2.5,by=0.1)),bounded_bal_func,"sq",log(3)))
 
 # set.seed(123)
 # test2 <- RF_PT_IIT_sim(p=200,startsim=1, endsim=1, L_samples=50, total_swaps=10, temp=1/1:5, method='M2')
 # set.seed(123)
 # test3 <- RF_PT_IIT_sim(p=200,startsim=1, endsim=1, L_samples=50, total_swaps=10, temp=1/1:5, method='M3')
+
+########### Testing remaining PT-IIT   ##############
+Rcpp::sourceCpp("functions/cpp_functions.cpp")
+set.seed(234)
+test1 <- PT_IIT_bounded_sim(p=200,startsim=1, endsim=5, L_samples=1000, total_swaps=25, temp=1/1:5, method_input='M1',prob_logbound=rep(4,5))
+
+test2 <- RF_PT_IIT_noadjust_sim(p=200,startsim=1, endsim=5, numiter=100, iterswap=25, temp=1/1:5, method_input='M1')
+#PT_IIT_bounded_sim(int p,int startsim,int endsim, int L_samples,int total_swaps, vec temp, SEXP method_input,vec prob_logbound)
+# RF_PT_IIT_noadjust_sim(int p,int startsim,int endsim, int numiter,int iterswap, vec temp, SEXP method_input)

@@ -10,6 +10,9 @@ n <- 100
 p <- 200
 iterations <- 20000
 
+writeLines('1 es con correccion de Z factor\n2 es sin correccion de Z factor')
+algorithm <- as.numeric(readline('Select temperature ladder'))
+
 ##### Choose the temperature ladder to use #####
 temp1.1 <- (1+((1:5)-1))^(-1) #J=4, Delta=1
 temp1.2 <- (1+((1:10)-1))^(-1) #J=9, Delta=1
@@ -37,9 +40,17 @@ for(chunk_selected in 1:5){
   start_point <- 1+(chunk_selected-1)*20
   end_point <- chunk_selected*20
   set.seed(seed_def + chunk_selected)
-  results <- RF_PT_IIT_sim(p=p,startsim=start_point, endsim=end_point, numiter=iterations, iterswap=100, temp=temp, method=m_selected)
-  write.table(results$modes,paste0('results/','resultados_PT-IIT_modelo',m_selected,'_temp_',t_selected,'_seed_',seed_def,'+',chunk_selected,'sim',start_point,'_',end_point,'_modes','.csv'),row.names=F, col.names=F, sep=',')  
-  write.table(results$ip,paste0('results/','resultados_PT-IIT_modelo',m_selected,'_temp_',t_selected,'_seed_',seed_def,'+',chunk_selected,'sim',start_point,'_',end_point,'_ip','.csv'),row.names=F, col.names=F, sep=',')  
+  if(algorithm==1){
+    results <- RF_PT_IIT_sim(p=p,startsim=start_point, endsim=end_point, numiter=iterations, iterswap=100, temp=temp, method=m_selected)
+    write.table(results$modes,paste0('results/','resultados_PT-IIT_modelo',m_selected,'_temp_',t_selected,'_seed_',seed_def,'+',chunk_selected,'sim',start_point,'_',end_point,'_modes','.csv'),row.names=F, col.names=F, sep=',')  
+    write.table(results$ip,paste0('results/','resultados_PT-IIT_modelo',m_selected,'_temp_',t_selected,'_seed_',seed_def,'+',chunk_selected,'sim',start_point,'_',end_point,'_ip','.csv'),row.names=F, col.names=F, sep=',')  
+  }
+  if(algorithm==2){
+    results <- RF_PT_IIT_noadjust_sim(p=p,startsim=start_point, endsim=end_point, numiter=iterations, iterswap=100, temp=temp, method=m_selected)
+    write.table(results$modes,paste0('results/','resultados_PT-IIT_modelo',m_selected,'_temp_',t_selected,'_seed_',seed_def,'+',chunk_selected,'sim',start_point,'_',end_point,'_modes','.csv'),row.names=F, col.names=F, sep=',')  
+    write.table(results$ip,paste0('results/','resultados_PT-IIT_modelo',m_selected,'_temp_',t_selected,'_seed_',seed_def,'+',chunk_selected,'sim',start_point,'_',end_point,'_ip','.csv'),row.names=F, col.names=F, sep=',')  
+    
+  }
 }
 
 

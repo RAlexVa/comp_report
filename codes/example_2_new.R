@@ -105,10 +105,16 @@ ex2_RF_IIT <- function(num_sim=50,
   write.csv(cbind(iter_conv,calls_for_pi,last_F_value),file=file.path(getwd(),'results',simulation_name) ,row.names = F)
 }
 
+
 # Parameters
 thetas <- c(6,7,8,9) 
 set.seed(1235) #Define seed
-for(i in 1:length(thetas)){
+writeLines('Define starting theta 6,7,8,9')
+starting_theta <- as.numeric(readline('Choose theta'))
+
+start_point <- which(thetas==starting_theta)
+set.seed(1235) #Define seed
+for(i in start_point:length(thetas)){
   theta_selected <- thetas[i]
   #### Examples with Rejection Free IIT    
   
