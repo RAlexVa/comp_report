@@ -420,7 +420,7 @@ test_geom(4.98435e-15)
 ########### Testing PT-IIT Adaptive  ##############
 Rcpp::sourceCpp("functions/cpp_functions.cpp")
 set.seed(123)
-test1 <- PT_IIT_adapt_sim(p=200,startsim=1, endsim=10, L_samples=1000, total_swaps=50, temp=1/1:5, method='M1')
+test1 <- PT_IIT_adapt_sim(p=200,startsim=1, endsim=100, L_samples=1000, total_swaps=25, temp=1/1:5, method='M1')
 matX <- readmodelX(1)
 resY <- readY(1)
 IIT_update_adp_bound(X=c(0,0,0,0,1,1,1,rep(0,193)), "sq", modelX=matX,resY=resY, temperature=0.5,log_bound=0)
@@ -430,7 +430,7 @@ IIT_update_adp_bound(X=c(0,0,0,0,1,1,1,rep(0,193)), "sq", modelX=matX,resY=resY,
 IIT_update_adp_bound(X=c(0,0,0,0,0,1,1,rep(0,193)), "sq", modelX=matX,resY=resY, temperature=1,log_bound=0)
 
 bounded_bal_func(log(10),"sq",log(3))
-bounded_bal_func(-.2,"sq",log(3))
+
 bounded_bal_func(.2,"sq",log(3))
 bounded_bal_func(.4,"sq",log(3))
 bounded_bal_func(1,"sq",log(3))
@@ -438,8 +438,14 @@ bounded_bal_func(2,"sq",log(3))
 bounded_bal_func(2.1,"sq",log(3))
 bounded_bal_func(22,"sq",log(3))
 
-sapply(log(seq(0.1,2.5,by=0.1)),bounded_bal_func,"sq",log(3))
 
+
+sapply(log(seq(0.1,10,by=0.1)),bounded_bal_func,"sq",5)
+sapply(log(seq(21500,22500,by=10)),bounded_bal_func,"sq",5)
+
+sapply(log(seq(100,150,by=1)),bounded_bal_func,"min",5)
+
+sapply(log(seq(0.1,2.5,by=0.1)),bounded_bal_func,"sq",5)
 exp(sapply(log(seq(0.1,2.5,by=0.1)),bounded_bal_func,"sq",log(3)))
 
 # set.seed(123)
