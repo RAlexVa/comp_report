@@ -23,6 +23,13 @@ dev.off()
 bounded_bf <- function(t,f,K=3){
   return(min(min(f(t),K),t*min(f(1/t),K))/K)
 }
+bounded_bf_log <- function(t,K=log(3)){
+  return(min(min(t/2,K),t+min(-t/2,K)))
+}
+
+# exp(sapply(log(seq(0.1,2.5,by=0.1)),bounded_bf_log))
+# sapply(seq(0.1,2.5,by=0.1),bounded_bf,f=sqrt)*3
+
 f_c <- function(x,c=1.3){
   e1 <- min(1,x*exp(-c));
   e2 <- min(x,exp(-c));

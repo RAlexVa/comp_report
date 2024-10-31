@@ -457,6 +457,26 @@ double test_loglik(vec state,mat modelX, colvec Y){
   return loglik(modelX,Y,find(state==1));
 }
 
+// [[Rcpp::export]]
+int test_while(int i) {
+
+  // Start of the while loop
+  while (i <= 5) {
+    Rcpp::Rcout << "Number: " << i << endl;
+    i++;  // Increment counter
+  }
+  return 0;
+}
+
+// [[Rcpp::export]]
+int test_geom(double p) {
+  
+  int result = R::rgeom(p);
+  
+  return result;
+}
+
+
 //////////////////////////////////
 //Some useful links
 
