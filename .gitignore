@@ -7,3 +7,4 @@ codes/pseudo_code.R
 /results_moba
 *.jpg
 *.jpeg
+results/VT_IIT_sim_results.rds
