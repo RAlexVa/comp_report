@@ -452,3 +452,12 @@ exp(sapply(log(seq(0.1,2.5,by=0.1)),bounded_bal_func,"sq",log(3)))
 # test2 <- RF_PT_IIT_sim(p=200,startsim=1, endsim=1, L_samples=50, total_swaps=10, temp=1/1:5, method='M2')
 # set.seed(123)
 # test3 <- RF_PT_IIT_sim(p=200,startsim=1, endsim=1, L_samples=50, total_swaps=10, temp=1/1:5, method='M3')
+
+########### Testing remaining PT-IIT   ##############
+Rcpp::sourceCpp("functions/cpp_functions.cpp")
+set.seed(234)
+test1 <- PT_IIT_bounded_sim(p=200,startsim=1, endsim=5, L_samples=1000, total_swaps=25, temp=1/1:5, method_input='M1',prob_logbound=rep(4,5))
+
+test2 <- RF_PT_IIT_noadjust_sim(p=200,startsim=1, endsim=5, numiter=100, iterswap=25, temp=1/1:5, method_input='M1')
+#PT_IIT_bounded_sim(int p,int startsim,int endsim, int L_samples,int total_swaps, vec temp, SEXP method_input,vec prob_logbound)
+# RF_PT_IIT_noadjust_sim(int p,int startsim,int endsim, int numiter,int iterswap, vec temp, SEXP method_input)
