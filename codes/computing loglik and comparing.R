@@ -23,7 +23,7 @@ data_s <- as.data.frame(cbind(res$Y,res$X[,variables+1]))
 mod <- lm(V1 ~., data=data_s)
 logLik(mod)
 
-###### Testing how to redefine a function by fixing some parameters
+###### Testing how to redefine a function by fixing some parameters 
 logL_0(res$Y)
 
 
@@ -312,7 +312,6 @@ library(Rcpp)
 library(RcppArmadillo)
 Rcpp::sourceCpp("functions/cpp_functions.cpp")
 Rcpp::sourceCpp("functions/cpp_testing_functions.cpp")
-
 test_loglik(c(1,1,1),matX,resY)
 logLikelihood(matX,resY,c(0,1,2))
 test_loglik(c(0,0,0,0,0),matX,resY)
@@ -393,3 +392,57 @@ random_binom(7,5,1,2)
 
 #index_pro(int p, vec temp, int numswap, double swap_prob )
 index_pro(10,c(1,1/2,1/3,1/4,1/5),20,0.7)
+
+########### Testing for accesing lists within Rcpp ##############
+library(Rcpp)
+library(RcppArmadillo)
+Rcpp::sourceCpp("functions/cpp_functions.cpp")
+matX <- readmodelX(1)
+resY <- readY(1)
+cur <- logL_0(resY)
+#test_bound(vec X, String chosen_bf, mat modelX, vec resY, double temperature, double log_bound)
+temp <- (1+((1:5)-1))^(-1)
+X <- c(1,1,1,rep(0,197))
+X <- rep(0,200)
+test <- bound_IIT_update(X,"sq",matX,resY,1,0)
+test2 <- test_bound(X,"sq",matX,resY,1,0)
+
+########### Testing while loop ##############
+Rcpp::sourceCpp("functions/cpp_testing_functions.cpp")
+test_while(4)
+
+set.seed(123)
+test_geom(0.03)
+test_geom(0.95)
+test_geom(1.52481e-18)
+test_geom(4.98435e-15)
+
+########### Testing PT-IIT Adaptive  ##############
+Rcpp::sourceCpp("functions/cpp_functions.cpp")
+set.seed(123)
+test1 <- PT_IIT_adapt_sim(p=200,startsim=1, endsim=10, L_samples=1000, total_swaps=50, temp=1/1:5, method='M1')
+matX <- readmodelX(1)
+resY <- readY(1)
+IIT_update_adp_bound(X=c(0,0,0,0,1,1,1,rep(0,193)), "sq", modelX=matX,resY=resY, temperature=0.5,log_bound=0)
+
+IIT_update_adp_bound(X=c(0,0,0,0,1,1,1,rep(0,193)), "sq", modelX=matX,resY=resY, temperature=1,log_bound=16)
+
+IIT_update_adp_bound(X=c(0,0,0,0,0,1,1,rep(0,193)), "sq", modelX=matX,resY=resY, temperature=1,log_bound=0)
+
+bounded_bal_func(log(10),"sq",log(3))
+bounded_bal_func(-.2,"sq",log(3))
+bounded_bal_func(.2,"sq",log(3))
+bounded_bal_func(.4,"sq",log(3))
+bounded_bal_func(1,"sq",log(3))
+bounded_bal_func(2,"sq",log(3))
+bounded_bal_func(2.1,"sq",log(3))
+bounded_bal_func(22,"sq",log(3))
+
+sapply(log(seq(0.1,2.5,by=0.1)),bounded_bal_func,"sq",log(3))
+
+exp(sapply(log(seq(0.1,2.5,by=0.1)),bounded_bal_func,"sq",log(3)))
+
+# set.seed(123)
+# test2 <- RF_PT_IIT_sim(p=200,startsim=1, endsim=1, L_samples=50, total_swaps=10, temp=1/1:5, method='M2')
+# set.seed(123)
+# test3 <- RF_PT_IIT_sim(p=200,startsim=1, endsim=1, L_samples=50, total_swaps=10, temp=1/1:5, method='M3')
