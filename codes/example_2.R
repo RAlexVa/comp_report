@@ -280,7 +280,11 @@ ex2_RF_IIT <- function(num_sim=50,
 # Parameters
 thetas <- c(6,7,8,9) 
 set.seed(1235) #Define seed
-for(i in 1:length(thetas)){
+writeLines('Define starting theta 6,7,8,9')
+starting_theta <- as.numeric(readline('Choose theta'))
+
+start_point <- which(thetas==starting_theta)
+for(i in start_point:length(thetas)){
     theta_selected <- thetas[i]
     
     example2(theta=theta_selected,
@@ -321,26 +325,26 @@ for(i in 1:length(thetas)){
              name_alg='MTM')
   #### Examples with Rejection Free IIT    
     
-    ex2_RF_IIT(theta=theta_selected,
-               h=hsq_log,
-               name_alg='IIT-RF-1',
-               initial_K=.01) #tiny constany
-    ############################    
-    ex2_RF_IIT(theta=theta_selected,
-               h=hsq_log,
-               name_alg='IIT-RF-2',
-               initial_K=1) #small constant  
-    
-    ############################
-    ex2_RF_IIT(theta=theta_selected,
-               h=hsq_log,
-               name_alg='IIT-RF-4',
-               initial_K=10*exp(theta_selected))#big bounding K
-    
-    ############################
-    ex2_RF_IIT(theta=theta_selected,
-               h=hsq_log,
-               name_alg='IIT-RF-5',
-               initial_K=300*exp(theta_selected))#huge bounding K    
+    # ex2_RF_IIT(theta=theta_selected,
+    #            h=hsq_log,
+    #            name_alg='IIT-RF-1',
+    #            initial_K=.01) #tiny constany
+    # ############################    
+    # ex2_RF_IIT(theta=theta_selected,
+    #            h=hsq_log,
+    #            name_alg='IIT-RF-2',
+    #            initial_K=1) #small constant  
+    # 
+    # ############################
+    # ex2_RF_IIT(theta=theta_selected,
+    #            h=hsq_log,
+    #            name_alg='IIT-RF-4',
+    #            initial_K=10*exp(theta_selected))#big bounding K
+    # 
+    # ############################
+    # ex2_RF_IIT(theta=theta_selected,
+    #            h=hsq_log,
+    #            name_alg='IIT-RF-5',
+    #            initial_K=300*exp(theta_selected))#huge bounding K    
     
   }
