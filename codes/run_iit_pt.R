@@ -47,8 +47,8 @@ for(chunk_selected in 1:5){
   }
   if(algorithm==2){
     results <- RF_PT_IIT_noadjust_sim(p=p,startsim=start_point, endsim=end_point, numiter=iterations, iterswap=100, temp=temp, method=m_selected)
-    write.table(results$modes,paste0('results/','resultados_PT-IIT_modelo',m_selected,'_temp_',t_selected,'_seed_',seed_def,'+',chunk_selected,'sim',start_point,'_',end_point,'_modes','.csv'),row.names=F, col.names=F, sep=',')  
-    write.table(results$ip,paste0('results/','resultados_PT-IIT_modelo',m_selected,'_temp_',t_selected,'_seed_',seed_def,'+',chunk_selected,'sim',start_point,'_',end_point,'_ip','.csv'),row.names=F, col.names=F, sep=',')  
+    write.table(results$modes,paste0('results/','resultados_noad_PT-IIT_modelo',m_selected,'_temp_',t_selected,'_seed_',seed_def,'+',chunk_selected,'sim',start_point,'_',end_point,'_modes','.csv'),row.names=F, col.names=F, sep=',')  
+    write.table(results$ip,paste0('results/','resultados_noad_PT-IIT_modelo',m_selected,'_temp_',t_selected,'_seed_',seed_def,'+',chunk_selected,'sim',start_point,'_',end_point,'_ip','.csv'),row.names=F, col.names=F, sep=',')  
     
   }
 }
