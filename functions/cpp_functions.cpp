@@ -1206,7 +1206,7 @@ if(update_s<0){total_samples=L_samples;}//To escape the loop in case of an error
         // Rcpp::Rcout <<"Index process:\n "<< index_process<< std::endl;
     }// End loop of iterations
     // Rcpp::Rcout <<"Final state "<< X << std::endl;
-  Rcpp::Rcout <<"Bounds for sim "<<s<<":\n "<< prob_logbound<< std::endl;
+  // Rcpp::Rcout <<"Bounds for sim "<<s<<":\n "<< prob_logbound<< std::endl;
   }//End loop simulations
   List ret;
   ret["modes"]=modes_visited;
