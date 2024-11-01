@@ -11,7 +11,7 @@ p <- 200
 iterations <- 20000
 
 writeLines('1 es con correccion de Z factor\n2 es sin correccion de Z factor')
-algorithm <- as.numeric(readline('Select temperature ladder'))
+algorithm <- as.numeric(readline('Select algortihm'))
 
 ##### Choose the temperature ladder to use #####
 temp1.1 <- (1+((1:5)-1))^(-1) #J=4, Delta=1

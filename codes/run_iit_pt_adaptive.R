@@ -11,7 +11,7 @@ p <- 200
 # iterations <- 20000
 
 writeLines('1 es Adaptive\n2 es bounded')
-algorithm <- as.numeric(readline('Select temperature ladder'))
+algorithm <- as.numeric(readline('Select algorithm'))
 
 ##### Choose the temperature ladder to use #####
 temp1.1 <- (1+((1:5)-1))^(-1) #J=4, Delta=1
