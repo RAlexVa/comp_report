@@ -66,112 +66,88 @@ data_ex1 <- rbind(data_ex1,ex1_rf_iit |> select(colnames(data_ex1)))
 data_ex3 <- rbind(data_ex3,ex3_rf_iit |> select(colnames(data_ex1)))
   
 
-##### Plot for example 1 #####
+##### Plots for example 1 #####
 
-##### Example 1 #####
-ex1_img1 <- data_ex1 |> 
-  filter(p_1==50) |> filter(alg %nin% paste0('IIT-RF-',1:5)) |> 
-  mutate(post_calls=ifelse(calls_for_pi>500000,500000,calls_for_pi)) |> 
-  ggplot(aes(x=theta,y=post_calls)) +
-  geom_boxplot(aes(fill=alg))+
-  labs(x=TeX("$\\theta$"), y=TeX('Calls for $\\pi$'),title='Example 1', fill="Algorithm")
-ex1_img1 #Show
-#export
-jpeg(file.path(getwd(),'figures',"ex1.jpg"), width = 700)
-ex1_img1
-dev.off()
+p1 <- 50
+p1 <- 20
+{
+  ##### Example 1 #####
+  ex1_img1 <- data_ex1 |> 
+    filter(p_1==p1) |> filter(alg %nin% paste0('IIT-RF-',1:5)) |> 
+    mutate(post_calls=ifelse(calls_for_pi>500000,500000,calls_for_pi)) |> 
+    ggplot(aes(x=theta,y=post_calls)) +
+    geom_boxplot(aes(fill=alg))+
+    labs(x=TeX("$\\theta$"), y=TeX('Calls for $\\pi$'),title='Example 1', fill="Algorithm")
+  ex1_img1 #Show
+  #export
+  jpeg(file.path(getwd(),'figures',paste0("ex1_",p1,".jpg")), width = 700)
+  ex1_img1
+  dev.off()
+  
+  ##### Example 1 by theta #####
+  ex1_img1_theta <- data_ex1 |> filter(alg %nin% 'MTM') |> 
+    filter(p_1==p1) |> filter(alg %nin% paste0('IIT-RF-',1:5)) |> 
+    mutate(post_calls=ifelse(calls_for_pi>500000,500000,calls_for_pi)) |> 
+    ggplot(aes(y=post_calls)) +
+    geom_boxplot(aes(fill=alg))+
+    facet_wrap(~theta, scales = "free_y")+
+    theme(axis.title.x=element_blank(),
+          axis.text.x=element_blank(),
+          axis.ticks.x=element_blank())+
+    labs(y=TeX('Calls for $\\pi$'),title=TeX('Example 1 (comparing $\\theta$)'), fill="Algorithm")
+  ex1_img1_theta #Show
+  jpeg(file.path(getwd(),'figures',paste0("ex1_by_theta_",p1,".jpg")), width = 700)
+  ex1_img1_theta
+  dev.off()
+  
+  ##### Example 1 RF-IIT #####
+  ex1_img2 <- data_ex1 |> 
+    filter(p_1==p1) |> filter(alg %in% c(paste0('IIT-RF-',1:5),'IIT')) |> 
+    #filter(theta>8) |> 
+    #mutate(post_calls=calls_for_pi) |> 
+    mutate(post_calls=ifelse(calls_for_pi>500000,500000,calls_for_pi)) |> 
+    ggplot(aes(x=theta,y=post_calls)) +
+    geom_boxplot(aes(fill=alg))+
+    labs(x=TeX("$\\theta$"), y=TeX('Calls for $\\pi$'),title='Example 1 (RF-IIT)', fill="Algorithm")
+  ex1_img2 #Show
+  #export
+  jpeg(file.path(getwd(),'figures',paste0("ex1_2_",p1,".jpg")), width = 700)
+  ex1_img2
+  dev.off() 
+  
+  ##### Example 1 RF-IIT by theta #####
+  ex1_img2_by_theta <- data_ex1 |> 
+    filter(p_1==p1) |> filter(alg %in% c(paste0('IIT-RF-',1:5),'IIT')) |> 
+    # filter(theta%in%c(6,7)) |> 
+    mutate(post_calls=ifelse(calls_for_pi>500000,500000,calls_for_pi)) |> 
+    ggplot(aes(y=post_calls)) +
+    geom_boxplot(aes(fill=alg))+facet_wrap(~theta, scales = "free_y")+
+    theme(axis.title.x=element_blank(),
+          axis.text.x=element_blank(),
+          axis.ticks.x=element_blank())+
+    labs(y=TeX('Calls for $\\pi$'),title=TeX('Example 1 (RF-IIT, comparing $\\theta$)'), fill="Algorithm")
+  ex1_img2_by_theta
+  jpeg(file.path(getwd(),'figures',paste0("ex1_2_by_theta_",p1,".jpg")), width = 700)
+  ex1_img2_by_theta
+  dev.off() 
+  
+}
+  
+##### FINISH Plots for example 1#####
 
-##### Example 1 by theta #####
-ex1_img1_theta <- data_ex1 |> filter(alg %nin% 'MTM') |> 
-  filter(p_1==50) |> filter(alg %nin% paste0('IIT-RF-',1:5)) |> 
-  mutate(post_calls=ifelse(calls_for_pi>500000,500000,calls_for_pi)) |> 
-  ggplot(aes(y=post_calls)) +
-  geom_boxplot(aes(fill=alg))+
-  facet_wrap(~theta, scales = "free_y")+
-  theme(axis.title.x=element_blank(),
-        axis.text.x=element_blank(),
-        axis.ticks.x=element_blank())+
-  labs(y=TeX('Calls for $\\pi$'),title=TeX('Example 1 (comparing $\\theta$)'), fill="Algorithm")
-ex1_img1_theta #Show
-jpeg(file.path(getwd(),'figures',"ex1_by_theta.jpg"), width = 700)
-ex1_img1_theta
-dev.off()
-
-##### Example 1 RF-IIT #####
-ex1_img2 <- data_ex1 |> 
-  filter(p_1==50) |> filter(alg %in% c(paste0('IIT-RF-',1:5),'IIT')) |> 
-  #filter(theta>8) |> 
-  #mutate(post_calls=calls_for_pi) |> 
-  mutate(post_calls=ifelse(calls_for_pi>500000,500000,calls_for_pi)) |> 
-  ggplot(aes(x=theta,y=post_calls)) +
-  geom_boxplot(aes(fill=alg))+
-  labs(x=TeX("$\\theta$"), y=TeX('Calls for $\\pi$'),title='Example 1 (RF-IIT)', fill="Algorithm")
-ex1_img2 #Show
-#export
-jpeg(file.path(getwd(),'plots',"ex1_2.jpg"), width = 700)
-ex1_img2
-dev.off() 
-
-##### Example 1 RF-IIT by theta #####
-ex1_img2_by_theta <- data_ex1 |> 
-  filter(p_1==50) |> filter(alg %in% c(paste0('IIT-RF-',1:5),'IIT')) |> 
-  # filter(theta%in%c(6,7)) |> 
-  mutate(post_calls=ifelse(calls_for_pi>500000,500000,calls_for_pi)) |> 
-  ggplot(aes(y=post_calls)) +
-  geom_boxplot(aes(fill=alg))+facet_wrap(~theta, scales = "free_y")+
-  theme(axis.title.x=element_blank(),
-        axis.text.x=element_blank(),
-        axis.ticks.x=element_blank())+
-  labs(y=TeX('Calls for $\\pi$'),title=TeX('Example 1 (RF-IIT, comparing $\\theta$)'), fill="Algorithm")
-ex1_img2_by_theta
-jpeg(file.path(getwd(),'plots',"ex1_2_by_theta.jpg"), width = 700)
-ex1_img2_by_theta
-dev.off() 
-
-
-#export for slides
-# jpeg(file.path(getwd(),'plots',"ex1_2_67.jpg"), width = 700)
-# data_ex1 |> 
-#   filter(p_1==50) |> filter(alg %in% c(paste0('IIT-RF-',1:5),'IIT')) |> 
-#   filter(theta%in%c(6,7)) |> 
-#   mutate(post_calls=ifelse(calls_for_pi>500000,500000,calls_for_pi)) |> 
-#   ggplot(aes(x=theta,y=post_calls)) +
-#   geom_boxplot(aes(fill=alg))+
-#   labs(x=TeX("$\\theta$"), y=TeX('Calls for $\\pi$'),title='Example 1', fill="Algorithm")
-# dev.off() 
-# jpeg(file.path(getwd(),'plots',"ex1_2_89.jpg"), width = 700)
-# data_ex1 |> 
-#   filter(p_1==50) |> filter(alg %in% c(paste0('IIT-RF-',1:5),'IIT')) |> 
-#   filter(theta%in%c(8,9)) |> 
-#   mutate(post_calls=ifelse(calls_for_pi>500000,500000,calls_for_pi)) |> 
-#   ggplot(aes(x=theta,y=post_calls)) +
-#   geom_boxplot(aes(fill=alg))+
-#   labs(x=TeX("$\\theta$"), y=TeX('Calls for $\\pi$'),title='Example 1', fill="Algorithm")
-# dev.off() 
-
-
-
-
-
-data_ex1 |> 
-  filter(p_1==20) |>  filter(alg!='MTM', alg %nin% paste0('IIT-RF-',1:5)) |> 
-  mutate(post_calls=ifelse(calls_for_pi>500000,500000,calls_for_pi)) |> 
-  ggplot(aes(x=theta,y=post_calls)) +
-  geom_boxplot(aes(fill=alg))+
-  labs(x=TeX("$\\theta$"), y=TeX('Calls for $\\pi$'),title='Example 1', fill="Algorithm")
 
 ##### Plot for example 2 #####
 
 ex2 <- data_ex2 |> 
   mutate(post_calls=ifelse(calls_for_pi>500000,500000,calls_for_pi)) |> 
-  filter(alg%nin%c('IIT')) |> 
-  filter(alg%nin%c('MTM')) |> 
+  filter(alg%nin%c('IIT')) |> #In the original paper they don't include IIT
+  filter(alg%nin%c('MTM')) |>
   ggplot(aes(x=theta,y=post_calls)) +
   geom_boxplot(aes(fill=alg))+
   labs(x=TeX("$\\theta$"), y=TeX('Calls for $\\pi$'),title='Example 2', fill="Algorithm")
 ex2 #Show
 #export
-jpeg(file.path(getwd(),'plots',"ex2.jpg"), width = 700)
+jpeg(file.path(getwd(),'figures',"ex2.jpg"), width = 700)
 ex2
 dev.off() 
 
@@ -184,9 +160,10 @@ ex3 <- data_ex3 |>
   geom_boxplot(aes(fill=alg))+
   labs(x=TeX("$\\theta$"), y=TeX('Calls for $\\pi$'),title='Example 3', fill="Algorithm")
 ex3 #Show
-jpeg(file.path(getwd(),'plots',"ex3.jpg"), width = 700)
+jpeg(file.path(getwd(),'figures',"ex3.jpg"), width = 700)
 ex3
 dev.off() 
+
 ex3_2 <- data_ex3 |> 
   mutate(post_calls=ifelse(calls_for_pi>500000,500000,calls_for_pi)) |> 
   filter(alg %in% c(paste0('IIT-RF-',1:5),'IIT')) |>
@@ -195,7 +172,7 @@ ex3_2 <- data_ex3 |>
   geom_boxplot(aes(fill=alg))+
   labs(x=TeX("$\\theta$"), y=TeX('Calls for $\\pi$'),title='Example 3', fill="Algorithm")
 ex3_2 #Show
-jpeg(file.path(getwd(),'plots',"ex3_2.jpg"), width = 700)
+jpeg(file.path(getwd(),'figures',"ex3_2.jpg"), width = 700)
 ex3_2
 dev.off() 
 
