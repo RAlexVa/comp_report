@@ -64,17 +64,24 @@ for(method in 0:3){
 ##### Analyzing results #####
 
 # data <- readRDS('results/VT_IIT_sim_results.rds')
-data <- readRDS('results/VT_IIT_sim_results_m0.rds')
+res_tot <- NA
+for(method in 0:3){
+  data <- readRDS(paste0('results/VT_IIT_sim_results_m',method,'.rds'))
+  ### Summarize data
+  resumen <- data |> select(-temp) |> 
+    group_by(method,t_ladder,sim,mode, iterations) |>
+    summarise(visited=n()) |> ungroup()
+  resumen$mode <- paste0('m',resumen$mode)
+  
+  resumen <- resumen |> pivot_wider(names_from = mode,values_from = visited)
+  res_tot <- rbind(res_tot,resumen)
+}
+resumen <- res_tot[-1,]
 
-### Summarize data
-resumen <- data |> select(-temp) |> 
-  group_by(method,t_ladder,sim,mode, iterations) |>
-  summarise(visited=n()) |> ungroup()
-resumen$mode <- paste0('m',resumen$mode)
-
-resumen <- resumen |> pivot_wider(names_from = mode,values_from = visited)
-
+rm(list=c('res_tot'))
 resumen[is.na(resumen)] <- 0
+#dim(resumen)
+#100*3*4*2 + 100*2
 # #Check that the row sums coincide
  # total_sim <- rowSums(resumen |> select(-method,-t_ladder,-sim,-iterations))
  # max(total_sim);min(total_sim)
@@ -93,7 +100,6 @@ visited <- percentages |>
                   group1=sum(c_across(m1:m3)),
                   group2=sum(c_across(m4:m6))) |> ungroup()
 
-
 final_table <- visited |> 
   select(method,t_ladder,iterations,total) |> 
   group_by_all() |> 
@@ -101,17 +107,46 @@ final_table <- visited |>
   ungroup() |> 
   pivot_wider(names_from = total, values_from = simulations)
 
+# final_table <- visited |> select(-group1,-group2,-total) |> 
+#   group_by(method,t_ladder,iterations) |> 
+#   summarise(across(starts_with("m"), \(x)sum(x, na.rm=T))) |> 
+#   ungroup() 
+
 final_table[is.na(final_table)] <- 0
 
-final_table$Method <- ifelse(final_table$method==0,'IIT',paste0('M',final_table$method-1))
+final_table$Method <- ifelse(final_table$method==0,'IIT',paste0('M',final_table$method))
 final_table$Delta <- ceiling(as.numeric(final_table$t_ladder)/2)
 final_table$Tot_temps <- 5+5*(1-as.numeric(final_table$t_ladder)%%2)
 final_table$Tot_temps <- ifelse(final_table$Method=='IIT',5,final_table$Tot_temps)
 final_table <- final_table |> arrange(Delta,Tot_temps,Method)
 
-final_table <- final_table |> 
-  select(Method,Delta,Tot_temps,`1`,`2`,`3`,`4`,`5`,`6`)
+final_table <- final_table |> arrange(iterations) |> 
+  select(Method,Delta,Tot_temps,iterations,`1`,`2`,`3`,`4`,`5`,`6`)
 
 final_table |> filter(Tot_temps==5)
-final_table$Tot_temps <- ifelse(final_table$Method=='IIT',10,final_table$Tot_temps)
-final_table |> filter(Tot_temps==10)
+final_table |> filter(Tot_temps==10|Method=='IIT')
+
+
+
+
+
+
+
+
+
+
+##### Checking speed of finding the modes #####
+# I need to find the smallest row index
+#But row indexes only go from 1 to 50k or 100k depending on iterations
+res_tot <- NA
+for(method in 0:3){
+  data <- readRDS(paste0('results/VT_IIT_sim_results_m',method,'.rds'))
+  ### Summarize data
+  resumen <- data |> select(-temp) |>  
+    mutate(r_i=row_number()) |> 
+    # group_by(method,t_ladder,mode,sim,iterations) |> 
+    group_by(method,t_ladder,sim,iterations) |> 
+    slice_min(r_i,n=1) |> ungroup()
+  
+
+}
