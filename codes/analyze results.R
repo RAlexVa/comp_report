@@ -128,7 +128,7 @@ final_table |> filter(Tot_temps==10|Method=='IIT')
 
 
 
-
+saveRDS(final_table,paste0('results/VT_IIT_full_results.rds'))
 
 
 
