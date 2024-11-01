@@ -127,12 +127,12 @@ final_table |> filter(Tot_temps==5)
 final_table |> filter(Tot_temps==10|Method=='IIT')
 
 
-
+##### Exporting for VT-IIT #####
 saveRDS(final_table,paste0('results/VT_IIT_full_results.rds'))
 
 
 
-
+##### For PT-IIT #####
 
 
 ##### Checking speed of finding the modes #####
@@ -147,6 +147,4 @@ for(method in 0:3){
     # group_by(method,t_ladder,mode,sim,iterations) |> 
     group_by(method,t_ladder,sim,iterations) |> 
     slice_min(r_i,n=1) |> ungroup()
-  
-
 }
