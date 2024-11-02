@@ -131,9 +131,65 @@ final_table |> filter(Tot_temps==10|Method=='IIT')
 saveRDS(final_table,paste0('results/VT_IIT_full_results.rds'))
 
 
+vtiit <- readRDS(paste0('results/VT_IIT_full_results.rds'))
+
+
+
 
 ##### For PT-IIT #####
+library(stringr)
+data_full <- tibble()
+files_results <- dir('results')
+files_results <- files_results[grepl("PT-IIT",files_results)]
+files_results <- files_results[grepl("_modes\\.csv$",files_results)]
 
+for(i in 1:length(files_results)){
+  file <- files_results[i]#1,40,80,120
+  alg <- str_extract(file, "(?<=resultados_).*?(?=_PT-IIT)")
+  start_sim <- as.numeric(gsub("^.*sim(\\d+)_.*$", "\\1", file))
+  end_sim <- as.numeric(gsub("^.*sim(\\d+)_(\\d+).*$", "\\2", file))
+  model <- str_extract(file, "(?<=modelo).{2}")
+  temp_read <- read.csv(paste0('results/',file), header=F)
+  
+  
+  
+  if(is.na(alg)|alg=='noad'){
+    if(is.na(alg)){alg <- 'pt'}
+    if(nrow(temp_read)!=400000){print(paste0("Wrong dimensions in ",i))}
+    temp_read$sim <- rep(start_sim:end_sim, each = 20000)
+    
+    temp_read <- temp_read |> 
+      pivot_longer(-sim, names_to='replica',values_to = 'mode') |> 
+      select(-replica) |> 
+      group_by(sim,mode) |> 
+      summarise(visits=n()) |> 
+      ungroup() |> 
+      pivot_wider(id_cols=sim,names_from=mode, values_from=visits)
+    
+    if(ncol(temp_read)!=8){print(paste0("Less columns in ",i))}
+    temp_read[is.na(check)] <- 0
+    colnames(temp_read) <- c("sim",paste0('m',0:6))
+    temp_read$model <- model
+    temp_read$alg <- alg
+  }
+  
+  if(alg %in% c('ada','bound')){
+    if(nrow(temp_read)!=6000){print(paste0("Wrong dimensions in ",i))}
+    temp_read$sim <- rep(start_sim:end_sim, each = 300)
+    
+    temp_read <- temp_read |> group_by(sim) |>
+      summarise(across(everything(), \(x) sum(x, na.rm = TRUE)))
+    if(ncol(temp_read)!=8){print(paste0("Less columns in ",i))}
+    colnames(temp_read) <- c("sim",paste0('m',0:6))
+    temp_read$model <- model
+    temp_read$alg <- alg
+  }
+  
+  data_full <- rbind(data_full,temp_read)
+  
+}
+
+saveRDS(data_full,paste0('results/PT_results.rds'))
 
 ##### Checking speed of finding the modes #####
 # I need to find the smallest row index
