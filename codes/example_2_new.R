@@ -114,7 +114,7 @@ starting_theta <- as.numeric(readline('Choose theta'))
 
 start_point <- which(thetas==starting_theta)
 set.seed(1235) #Define seed
-for(i in start_point:length(thetas)){
+for(i in start_point:start_point){
   theta_selected <- thetas[i]
   #### Examples with Rejection Free IIT    
   
