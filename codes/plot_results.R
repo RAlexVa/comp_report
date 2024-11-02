@@ -151,6 +151,21 @@ jpeg(file.path(getwd(),'figures',"ex2.jpg"), width = 700)
 ex2
 dev.off() 
 
+ex2_f <- data_ex2 |> 
+  mutate(post_calls=ifelse(calls_for_pi>500000,500000,calls_for_pi)) |> 
+  # filter(alg%nin%c('IIT')) |> #In the original paper they don't include IIT
+  filter(alg%nin%c('MTM')) |>
+  ggplot(aes(x=theta,y=post_calls)) +
+  geom_boxplot(aes(fill=alg))+
+  labs(x=TeX("$\\theta$"), y=TeX('Calls for $\\pi$'),title='Example 2', fill="Algorithm")
+ex2_f #Show
+#export
+jpeg(file.path(getwd(),'figures',"ex2_all.jpg"), width = 700)
+ex2_f
+dev.off() 
+
+
+
 ##### Plot for example 3 #####
 ex3 <- data_ex3 |> 
   mutate(post_calls=ifelse(calls_for_pi>500000,500000,calls_for_pi)) |> 
