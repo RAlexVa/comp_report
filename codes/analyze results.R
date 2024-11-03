@@ -149,6 +149,7 @@ for(i in 1:length(files_results)){
   start_sim <- as.numeric(gsub("^.*sim(\\d+)_.*$", "\\1", file))
   end_sim <- as.numeric(gsub("^.*sim(\\d+)_(\\d+).*$", "\\2", file))
   model <- str_extract(file, "(?<=modelo).{2}")
+  temperature <- str_extract(file, "(?<=temp_).{1}")
   temp_read <- read.csv(paste0('results/',file), header=F)
   
   
@@ -171,6 +172,7 @@ for(i in 1:length(files_results)){
     colnames(temp_read) <- c("sim",paste0('m',0:6))
     temp_read$model <- model
     temp_read$alg <- alg
+    temp_read$temp <- temperature
   }
   
   if(alg %in% c('ada','bound')){
@@ -183,14 +185,15 @@ for(i in 1:length(files_results)){
     colnames(temp_read) <- c("sim",paste0('m',0:6))
     temp_read$model <- model
     temp_read$alg <- alg
+    temp_read$temp <- temperature
   }
   
   data_full <- rbind(data_full,temp_read)
   
 }
-
+data_full[is.na(data_full)] <- 0
 saveRDS(data_full,paste0('results/PT_results.rds'))
-
+write.csv(data_full,paste0('results/PT_results.csv'), row.names = F)
 ##### Checking speed of finding the modes #####
 # I need to find the smallest row index
 #But row indexes only go from 1 to 50k or 100k depending on iterations
