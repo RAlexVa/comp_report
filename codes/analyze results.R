@@ -80,6 +80,7 @@ resumen <- res_tot[-1,]
 
 rm(list=c('res_tot'))
 resumen[is.na(resumen)] <- 0
+write.csv(resumen,"results/VT-IIT_resumen.csv", row.names=F)
 #dim(resumen)
 #100*3*4*2 + 100*2
 # #Check that the row sums coincide
@@ -133,6 +134,7 @@ saveRDS(final_table,paste0('results/VT_IIT_full_results.rds'))
 
 vtiit <- readRDS(paste0('results/VT_IIT_full_results.rds'))
 
+write.csv(vtiit,paste0('results/VT_IIT_full_results.csv'),row.names=F)
 
 
 
