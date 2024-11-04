@@ -192,3 +192,30 @@ ex3_2
 dev.off() 
 
 
+ex3_20 <- data_ex3 |> 
+  mutate(post_calls=ifelse(calls_for_pi>500000,500000,calls_for_pi)) |> 
+  filter(alg%nin%paste0('IIT-RF-',1:5)) |>
+  filter(p_1==20) |> 
+  ggplot(aes(x=theta,y=post_calls)) +
+  geom_boxplot(aes(fill=alg))+
+  labs(x=TeX("$\\theta$"), y=TeX('Calls for $\\pi$'),title='Example 3', fill="Algorithm")
+ex3_20 #Show
+jpeg(file.path(getwd(),'figures',"ex3_20.jpg"), width = 700)
+ex3_20
+dev.off() 
+
+ex3_20_2 <- data_ex3 |> 
+  mutate(post_calls=ifelse(calls_for_pi>500000,500000,calls_for_pi)) |> 
+  filter(alg %in% c(paste0('IIT-RF-',1:5),'IIT')) |>
+  filter(p_1==20) |> 
+  ggplot(aes(x=theta,y=post_calls)) +
+  geom_boxplot(aes(fill=alg))+
+  labs(x=TeX("$\\theta$"), y=TeX('Calls for $\\pi$'),title='Example 3', fill="Algorithm")
+ex3_20_2 #Show
+jpeg(file.path(getwd(),'figures',"ex3_20_2.jpg"), width = 700)
+ex3_20_2
+dev.off() 
+
+
+
+
