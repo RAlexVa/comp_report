@@ -80,6 +80,7 @@ resumen <- res_tot[-1,]
 
 rm(list=c('res_tot'))
 resumen[is.na(resumen)] <- 0
+write.csv(resumen,"results/VT-IIT_resumen.csv", row.names=F)
 #dim(resumen)
 #100*3*4*2 + 100*2
 # #Check that the row sums coincide
@@ -131,10 +132,70 @@ final_table |> filter(Tot_temps==10|Method=='IIT')
 saveRDS(final_table,paste0('results/VT_IIT_full_results.rds'))
 
 
+vtiit <- readRDS(paste0('results/VT_IIT_full_results.rds'))
+
+write.csv(vtiit,paste0('results/VT_IIT_full_results.csv'),row.names=F)
+
+
 
 ##### For PT-IIT #####
+library(stringr)
+data_full <- tibble()
+files_results <- dir('results')
+files_results <- files_results[grepl("PT-IIT",files_results)]
+files_results <- files_results[grepl("_modes\\.csv$",files_results)]
 
-
+for(i in 1:length(files_results)){
+  file <- files_results[i]#1,40,80,120
+  alg <- str_extract(file, "(?<=resultados_).*?(?=_PT-IIT)")
+  start_sim <- as.numeric(gsub("^.*sim(\\d+)_.*$", "\\1", file))
+  end_sim <- as.numeric(gsub("^.*sim(\\d+)_(\\d+).*$", "\\2", file))
+  model <- str_extract(file, "(?<=modelo).{2}")
+  temperature <- str_extract(file, "(?<=temp_).{1}")
+  temp_read <- read.csv(paste0('results/',file), header=F)
+  
+  
+  
+  if(is.na(alg)|alg=='noad'){
+    if(is.na(alg)){alg <- 'pt'}
+    if(nrow(temp_read)!=400000){print(paste0("Wrong dimensions in ",i))}
+    temp_read$sim <- rep(start_sim:end_sim, each = 20000)
+    
+    temp_read <- temp_read |> 
+      pivot_longer(-sim, names_to='replica',values_to = 'mode') |> 
+      select(-replica) |> 
+      group_by(sim,mode) |> 
+      summarise(visits=n()) |> 
+      ungroup() |> 
+      pivot_wider(id_cols=sim,names_from=mode, values_from=visits)
+    
+    if(ncol(temp_read)!=8){print(paste0("Less columns in ",i))}
+    temp_read[is.na(check)] <- 0
+    colnames(temp_read) <- c("sim",paste0('m',0:6))
+    temp_read$model <- model
+    temp_read$alg <- alg
+    temp_read$temp <- temperature
+  }
+  
+  if(alg %in% c('ada','bound')){
+    if(nrow(temp_read)!=6000){print(paste0("Wrong dimensions in ",i))}
+    temp_read$sim <- rep(start_sim:end_sim, each = 300)
+    
+    temp_read <- temp_read |> group_by(sim) |>
+      summarise(across(everything(), \(x) sum(x, na.rm = TRUE)))
+    if(ncol(temp_read)!=8){print(paste0("Less columns in ",i))}
+    colnames(temp_read) <- c("sim",paste0('m',0:6))
+    temp_read$model <- model
+    temp_read$alg <- alg
+    temp_read$temp <- temperature
+  }
+  
+  data_full <- rbind(data_full,temp_read)
+  
+}
+data_full[is.na(data_full)] <- 0
+saveRDS(data_full,paste0('results/PT_results.rds'))
+write.csv(data_full,paste0('results/PT_results.csv'), row.names = F)
 ##### Checking speed of finding the modes #####
 # I need to find the smallest row index
 #But row indexes only go from 1 to 50k or 100k depending on iterations
