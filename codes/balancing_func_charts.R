@@ -70,3 +70,69 @@ plot(x,y)
 lines(x,y)
 
 
+####### Otros ejemplos de bounded bf
+b_f_min <- function(x,f,k){
+  t1 <- min(f(x),k)
+  t2 <- min(f(1/x),k)
+  return (min(t1,x*t2)/k)
+}
+b_f_max <- function(x,f){
+  return (max(f(x),x*f(1/x)))
+}
+
+x <- seq(0.1,25,by=0.1)
+
+data_u <- tibble(r=x,
+                 f1=sapply(x,b_f_min,f=sqrt,k=1),
+                 f2=sapply(x,b_f_min,f=sqrt,k=1.5),
+                 f3=sapply(x,b_f_min,f=sqrt,k=2),
+                 f4=sapply(x,b_f_min,f=sqrt,k=3),
+                 f5=sapply(x,b_f_min,f=sqrt,k=5),
+                 f6=sapply(x,b_f_min,f=sqrt,k=10))
+
+n <- 5
+n.root <- function(a,n=5){a^(1/n)}
+data_u <- tibble(r=x,
+                 f1=sapply(x,b_f_min,f=n.root,k=1),
+                 f2=sapply(x,b_f_min,f=n.root,k=1.5),
+                 f3=sapply(x,b_f_min,f=n.root,k=2),
+                 f4=sapply(x,b_f_min,f=n.root,k=3),
+                 f5=sapply(x,b_f_min,f=n.root,k=5),
+                 f6=sapply(x,b_f_min,f=n.root,k=10))
+
+ data_u |> pivot_longer(-r,names_to = "b.fun",values_to = 'h(r)') |>  
+    ggplot(aes(x=r,y=`h(r)`,color = `b.fun`))+
+    geom_line(size=1)
+
+###### Bounded balancing functions #####
+ bf <- function(x,f,bb){
+   boundf <- min(f(x),bb)/bb
+   boundf_1 <- min(f(1/x),bb)/bb
+   
+   return(min(boundf,x*boundf_1))
+ }
+
+ for(i in seq(0,15,by=0.1)){
+   print(paste(round(bf(i,sqrt,4),4),round(bf(1/i,sqrt,4),4),round(i*bf(1/i,sqrt,4),10)==round(bf(i,sqrt,4),10)))
+ }
+ 
+ x <- seq(0.1,20,by=0.1)
+ 
+ data_u <- tibble(r=x,
+                  f1=sapply(x,bf,f=sqrt,bb=4),
+                  f2=sapply(x,bf,f=sqrt,bb=2),
+                  f3=sapply(x,bf,f=function(x){x^(2)},bb=2),
+                  f4=sapply(x,bf,f=function(x){x^(1/4)},bb=2),
+                  f5=sapply(x/16,min,1),
+                  f6=sapply(x/5,min,1))
+ 
+ data_u |> pivot_longer(-r,names_to = "b.fun",values_to = 'h(r)') |>  
+   ggplot(aes(x=r,y=`h(r)`,color = `b.fun`))+
+   geom_line(size=1)
+
+ # Using a power function doesnt seems to give good results
+ #But perhaps we can just use min function with a different bounding constant
+ #Here I think we can choose how important we want to make each neighbors
+ 
+ 
+ 
